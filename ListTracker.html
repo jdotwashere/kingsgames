@@ -31,6 +31,7 @@
         .header {
             text-align: center;
             margin-bottom: 30px;
+            position: relative;
         }
 
         .header h1 {
@@ -41,6 +42,28 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+
+        .home-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .home-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(102, 126, 234, 0.3);
         }
 
         .controls {
@@ -279,6 +302,11 @@
             .controls {
                 grid-template-columns: 1fr;
             }
+
+            .home-btn {
+                position: static;
+                margin-top: 10px;
+            }
         }
     </style>
 </head>
@@ -286,6 +314,7 @@
     <div class="container">
         <div class="header">
             <h1>List Tracker</h1>
+            <button class="home-btn" onclick="window.location.href='index.html'">Home</button>
         </div>
 
         <div class="controls">
