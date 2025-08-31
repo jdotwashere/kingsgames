@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCII Math Pet</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Courier New', monospace;
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .pet-container {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pet {
+            font-size: 20px;
+            line-height: 1.2;
+            white-space: pre;
+            display: inline-block;
+            transition: all 0.5s ease;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .pet.happy {
+            color: #00ff00;
+            animation: happyBounce 2s ease-in-out infinite;
+        }
+
+        .pet.hungry {
+            color: #ff6b6b;
+            animation: hungryShake 1s ease-in-out infinite;
+        }
+
+        .pet.thinking {
+            color: #4ecdc4;
+            animation: thinkingPulse 3s ease-in-out infinite;
+        }
+
+        .pet.dancing {
+            color: #ff9ff3;
+            animation: interpretiveDance 4s ease-in-out infinite;
+        }
+
+        @keyframes happyBounce {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        @keyframes hungryShake {
+            0%, 100% { transform: translateX(0px); }
+            25% { transform: translateX(-10px) rotate(-2deg); }
+            75% { transform: translateX(10px) rotate(2deg); }
+        }
+
+        @keyframes thinkingPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+        }
+
+        @keyframes interpretiveDance {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(90deg) scale(1.2) translateX(20px); }
+            50% { transform: rotate(180deg) scale(0.8) translateY(-30px); }
+            75% { transform: rotate(270deg) scale(1.1) translateX(-20px); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px;
+            min-width: 120px;
+        }
+
+        .stat-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .stat-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            transition: width 0.3s ease;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 15px 25px;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0px);
+        }
+
+        .math-input {
+            margin: 20px 0;
+        }
+
+        input {
+            padding: 15px;
+            font-size: 18px;
+            font-family: 'Courier New', monospace;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            width: 300px;
+            text-align: center;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .messages {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            min-height: 100px;
+            font-size: 16px;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .time-evolution {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .particles {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: white;
+            border-radius: 50%;
+            animation: particleFloat 3s linear infinite;
+        }
+
+        @keyframes particleFloat {
+            0% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+
+        .rainbow {
+            background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #8b00ff);
+            background-size: 400% 400%;
+            animation: rainbow 2s linear infinite;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="rainbow">🧮 ASCII Math Pet 🧮</h1>
+        
+        <div class="pet-container">
+            <div class="time-evolution">
+                <div id="timeInfo"></div>
+                <div id="evolutionStage"></div>
+            </div>
+            
+            <div id="pet" class="pet happy"></div>
+            
+            <div class="stats">
+                <div class="stat">
+                    <div>Happiness</div>
+                    <div class="stat-bar">
+                        <div id="happinessBar" class="stat-fill"></div>
+                    </div>
+                    <div id="happinessValue">100%</div>
+                </div>
+                <div class="stat">
+                    <div>Hunger</div>
+                    <div class="stat-bar">
+                        <div id="hungerBar" class="stat-fill"></div>
+                    </div>
+                    <div id="hungerValue">0%</div>
+                </div>
+                <div class="stat">
+                    <div>Intelligence</div>
+                    <div class="stat-bar">
+                        <div id="intelligenceBar" class="stat-fill"></div>
+                    </div>
+                    <div id="intelligenceValue">50%</div>
+                </div>
+                <div class="stat">
+                    <div>Age</div>
+                    <div class="stat-bar">
+                        <div id="ageBar" class="stat-fill"></div>
+                    </div>
+                    <div id="ageValue">0 seconds</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="pet()">Pet</button>
+            <button onclick="makeNoise()">Make Noise</button>
+            <button onclick="forceDance()">Force Dance</button>
+            <button onclick="randomMutation()">Random Mutation</button>
+        </div>
+
+        <div class="math-input">
+            <input type="text" id="mathInput" placeholder="Feed me math! (e.g., 2+2, sin(45), sqrt(16))" onkeydown="handleMathInput(event)">
+            <button onclick="feedMath()">Feed Math</button>
+        </div>
+
+        <div class="messages" id="messages">
+            <div>🌟 Your ASCII pet has awakened! It evolves based on time and craves mathematical equations...</div>
+        </div>
+    </div>
+
+    <script>
+        let petStats = {
+            happiness: 100,
+            hunger: 0,
+            intelligence: 50,
+            age: 0,
+            birthTime: Date.now()
+        };
+
+        let petPersonality = {
+            mood: 'happy',
+            lastFed: Date.now(),
+            mutations: [],
+            danceStyle: 'normal'
+        };
+
+        const asciiPets = {
+            baby: [
+                "   ◕   ◕   \n" +
+                "     ω     \n" +
+                "  \\  ---  / \n" +
+                "   \\     /  \n" +
+                "    \\___/   ",
+                
+                "   ◉   ◉   \n" +
+                "     ◡     \n" +
+                "  \\  ___  / \n" +
+                "   \\     /  \n" +
+                "    \\___/   "
+            ],
+            
+            teen: [
+                "   ●   ●   \n" +
+                "     ∩     \n" +
+                "  \\  ---  / \n" +
+                "   \\  |  /  \n" +
+                "    \\___/   \n" +
+                "     | |    ",
+                
+                "   ◕   ◕   \n" +
+                "     ◡     \n" +
+                "  \\  ___  / \n" +
+                "   \\  |  /  \n" +
+                "    \\___/   \n" +
+                "     | |    "
+            ],
+            
+            adult: [
+                "   ●   ●   \n" +
+                "     ∩     \n" +
+                "  \\  ---  / \n" +
+                "   \\  |  /  \n" +
+                "    \\___/   \n" +
+                "     | |    \n" +
+                "    /   \\   ",
+                
+                "   ◉   ◉   \n" +
+                "     ◡     \n" +
+                "  \\  ___  / \n" +
+                "   \\  |  /  \n" +
+                "    \\___/   \n" +
+                "     | |    \n" +
+                "    /   \\   "
+            ],
+            
+            elder: [
+                "   ●   ●   \n" +
+                "     ∩     \n" +
+                "  \\  ---  / \n" +
+                "   \\  |  /  \n" +
+                "    \\___/   \n" +
+                "     |_|    \n" +
+                "    /   \\   \n" +
+                "   /_   _\\  ",
+                
+                "   ◕   ◕   \n" +
+                "     ◡     \n" +
+                "  \\  ___  / \n" +
+                "   \\  |  /  \n" +
+                "    \\___/   \n" +
+                "     |_|    \n" +
+                "    /   \\   \n" +
+                "   /_   _\\  "
+            ]
+        };
+
+        const hungerPets = {
+            baby: [
+                "   ◕   ◕   \n" +
+                "     ω     \n" +
+                "  \\  ∩∩∩  / \n" +
+                "   \\     /  \n" +
+                "    \\___/   "
+            ],
+            teen: [
+                "   ●   ●   \n" +
+                "     ∩     \n" +
+                "  \\  ∩∩∩  / \n" +
+                "   \\  |  /  \n" +
+                "    \\___/   \n" +
+                "     | |    "
+            ],
+            adult: [
+                "   ●   ●   \n" +
+                "     ∩     \n" +
+                "  \\  ∩∩∩  / \n" +
+                "   \\  |  /  \n" +
+                "    \\___/   \n" +
+                "     | |    \n" +
+                "    /   \\   "
+            ],
+            elder: [
+                "   ●   ●   \n" +
+                "     ∩     \n" +
+                "  \\  ∩∩∩  / \n" +
+                "   \\  |  /  \n" +
+                "    \\___/   \n" +
+                "     |_|    \n" +
+                "    /   \\   \n" +
+                "   /_   _\\  "
+            ]
+        };
+
+        function getEvolutionStage() {
+            const ageMinutes = petStats.age / 60;
+            if (ageMinutes < 1) return 'baby';
+            if (ageMinutes < 3) return 'teen';
+            if (ageMinutes < 7) return 'adult';
+            return 'elder';
+        }
+
+        function getCurrentPet() {
+            const stage = getEvolutionStage();
+            const now = Date.now();
+            const timeIndex = Math.floor(now / 2000) % 2;
+            
+            if (petStats.hunger > 70) {
+                return hungerPets[stage][0];
+            }
+            
+            return asciiPets[stage][timeIndex];
+        }
+
+        function updatePetDisplay() {
+            const petElement = document.getElementById('pet');
+            petElement.textContent = getCurrentPet();
+            
+            // Update mood classes
+            petElement.className = 'pet';
+            if (petStats.hunger > 70) {
+                petElement.classList.add('hungry');
+                petPersonality.mood = 'hungry';
+            } else if (petStats.happiness > 80) {
+                petElement.classList.add('happy');
+                petPersonality.mood = 'happy';
+            } else if (petStats.intelligence > 70) {
+                petElement.classList.add('thinking');
+                petPersonality.mood = 'thinking';
+            } else {
+                petElement.classList.add('dancing');
+                petPersonality.mood = 'dancing';
+            }
+        }
+
+        function updateStats() {
+            const now = Date.now();
+            petStats.age = Math.floor((now - petStats.birthTime) / 1000);
+            
+            // Natural hunger increase
+            if (now - petPersonality.lastFed > 10000) {
+                petStats.hunger = Math.min(100, petStats.hunger + 1);
+            }
+            
+            // Happiness decreases with hunger
+            if (petStats.hunger > 50) {
+                petStats.happiness = Math.max(0, petStats.happiness - 1);
+            }
+            
+            // Update UI
+            document.getElementById('happinessBar').style.width = petStats.happiness + '%';
+            document.getElementById('hungerBar').style.width = petStats.hunger + '%';
+            document.getElementById('intelligenceBar').style.width = petStats.intelligence + '%';
+            document.getElementById('ageBar').style.width = Math.min(100, petStats.age) + '%';
+            
+            document.getElementById('happinessValue').textContent = petStats.happiness + '%';
+            document.getElementById('hungerValue').textContent = petStats.hunger + '%';
+            document.getElementById('intelligenceValue').textContent = petStats.intelligence + '%';
+            document.getElementById('ageValue').textContent = petStats.age + ' seconds';
+            
+            // Update time info
+            const timeInfo = document.getElementById('timeInfo');
+            const evolutionStage = document.getElementById('evolutionStage');
+            timeInfo.textContent = new Date().toLocaleTimeString();
+            evolutionStage.textContent = 'Stage: ' + getEvolutionStage();
+        }
+
+        function addMessage(message) {
+            const messages = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            messages.appendChild(messageDiv);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function pet() {
+            petStats.happiness = Math.min(100, petStats.happiness + 10);
+            addMessage('Pet feels loved! Happiness +10');
+            createParticles();
+        }
+
+        function makeNoise() {
+            const noises = ['Beep!', 'Boop!', 'Bzzt!', 'Whirr!', 'Ping!', 'Zap!'];
+            const noise = noises[Math.floor(Math.random() * noises.length)];
+            addMessage('Pet says: ' + noise);
+            
+            // Play a tone
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = Math.random() * 1000 + 200;
+            oscillator.type = 'square';
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.2);
+        }
+
+        function forceDance() {
+            const petElement = document.getElementById('pet');
+            petElement.classList.add('dancing');
+            addMessage('Pet is doing interpretive dance!');
+            
+            setTimeout(() => {
+                updatePetDisplay();
+            }, 4000);
+        }
+
+        function randomMutation() {
+            const mutations = [
+                'Grew rainbow stripes!',
+                'Developed telepathic abilities!',
+                'Can now solve calculus!',
+                'Gained the ability to fly!',
+                'Learned to speak binary!',
+                'Evolved quantum consciousness!'
+            ];
+            
+            const mutation = mutations[Math.floor(Math.random() * mutations.length)];
+            petPersonality.mutations.push(mutation);
+            petStats.intelligence = Math.min(100, petStats.intelligence + 20);
+            addMessage('MUTATION: ' + mutation);
+        }
+
+        function feedMath() {
+            const input = document.getElementById('mathInput');
+            const equation = input.value.trim();
+            
+            if (!equation) {
+                addMessage('Please enter a math equation!');
+                return;
+            }
+            
+            try {
+                // Simple math evaluation (safe subset)
+                let result;
+                if (equation.includes('sin')) {
+                    result = Math.sin(parseFloat(equation.replace('sin(', '').replace(')', '')) * Math.PI / 180);
+                } else if (equation.includes('cos')) {
+                    result = Math.cos(parseFloat(equation.replace('cos(', '').replace(')', '')) * Math.PI / 180);
+                } else if (equation.includes('sqrt')) {
+                    result = Math.sqrt(parseFloat(equation.replace('sqrt(', '').replace(')', '')));
+                } else if (equation.includes('pow')) {
+                    const nums = equation.replace('pow(', '').replace(')', '').split(',');
+                    result = Math.pow(parseFloat(nums[0]), parseFloat(nums[1]));
+                } else {
+                    // Simple arithmetic
+                    result = Function('"use strict"; return (' + equation + ')')();
+                }
+                
+                petStats.hunger = Math.max(0, petStats.hunger - 20);
+                petStats.intelligence = Math.min(100, petStats.intelligence + 5);
+                petStats.happiness = Math.min(100, petStats.happiness + 15);
+                petPersonality.lastFed = Date.now();
+                
+                addMessage(`Yum! ${equation} = ${result.toFixed(2)}. Intelligence +5, Happiness +15, Hunger -20`);
+                input.value = '';
+                
+            } catch (e) {
+                addMessage('Invalid equation! Pet is confused...');
+                petStats.happiness = Math.max(0, petStats.happiness - 5);
+            }
+        }
+
+        function handleMathInput(event) {
+            if (event.key === 'Enter') {
+                feedMath();
+            }
+        }
+
+        function createParticles() {
+            for (let i = 0; i < 10; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particles';
+                particle.style.left = Math.random() * window.innerWidth + 'px';
+                particle.style.top = window.innerHeight + 'px';
+                particle.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                document.body.appendChild(particle);
+                
+                setTimeout(() => {
+                    particle.remove();
+                }, 3000);
+            }
+        }
+
+        // Main game loop
+        setInterval(() => {
+            updateStats();
+            updatePetDisplay();
+        }, 1000);
+
+        // Random events
+        setInterval(() => {
+            const events = [
+                'Pet is contemplating the meaning of π...',
+                'Pet discovered a new mathematical theorem!',
+                'Pet is humming the Fibonacci sequence...',
+                'Pet is trying to calculate the square root of -1...',
+                'Pet is having existential thoughts about infinity...'
+            ];
+            
+            if (Math.random() < 0.3) {
+                addMessage(events[Math.floor(Math.random() * events.length)]);
+            }
+        }, 15000);
+
+        // Initialize
+        updateStats();
+        updatePetDisplay();
+    </script>
+</body>
+</html>
