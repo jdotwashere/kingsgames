@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Clicker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .cookie-count {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .cookie-section {
+            text-align: center;
+        }
+
+        .cookie-button {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            transition: all 0.2s ease;
+            margin-bottom: 20px;
+        }
+
+        .cookie-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+        }
+
+        .cookie-button:active {
+            transform: scale(0.95);
+        }
+
+        .shop {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .shop h3 {
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .shop-item {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .shop-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .shop-item h4 {
+            margin-bottom: 5px;
+        }
+
+        .shop-item p {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        .buy-button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .buy-button:hover {
+            background: linear-gradient(45deg, #45a049, #4CAF50);
+            transform: translateY(-2px);
+        }
+
+        .buy-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .tabs {
+            display: flex;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 16px;
+        }
+
+        .tab.active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .tab-content {
+            display: none;
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .settings-section {
+            margin-bottom: 20px;
+        }
+
+        .settings-section h4 {
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .color-presets {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .color-preset {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .color-preset:hover {
+            border-color: white;
+            transform: scale(1.1);
+        }
+
+        .slider-group {
+            margin-bottom: 15px;
+        }
+
+        .slider-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.3);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4CAF50;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4CAF50;
+            cursor: pointer;
+            border: none;
+        }
+
+        .pastry-options, .location-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .pastry-option, .location-option {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pastry-option:hover, .location-option:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .pastry-option input, .location-option input {
+            margin-right: 8px;
+        }
+
+        #fallingCookies {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .falling-cookie {
+            position: absolute;
+            font-size: 24px;
+            animation: fall 2s linear forwards;
+            pointer-events: none;
+        }
+
+        @keyframes fall {
+            from {
+                top: -50px;
+                opacity: 1;
+            }
+            to {
+                top: 100vh;
+                opacity: 0;
+            }
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        @media (max-width: 768px) {
+            .game-area {
+                grid-template-columns: 1fr;
+            }
+            
+            .cookie-button {
+                width: 150px;
+                height: 150px;
+                font-size: 20px;
+            }
+            
+            .cookie-count {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="cookie-count" id="cookieCount">0</div>
+            <div id="cpsDisplay">Cookies per second: <span id="cps">0</span></div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('game')">Game</button>
+            <button class="tab" onclick="showTab('settings')">Settings</button>
+        </div>
+
+        <div id="gameTab" class="tab-content active">
+            <div class="game-area">
+                <div class="cookie-section">
+                    <button class="cookie-button" onclick="clickCookie(event)" id="mainCookieButton">
+                        <span id="cookieEmoji">🍪</span><br><span id="cookieButtonText">Click Me!</span>
+                    </button>
+                    
+                    <div class="stats">
+                        <div class="stat-item">
+                            <div>Total Clicks</div>
+                            <div class="stat-value" id="totalClicks">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div>Rebirth Bonus</div>
+                            <div class="stat-value" id="rebirthBonus">1.0x</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="shop">
+                    <h3>Shop</h3>
+                    
+                    <div class="shop-item">
+                        <h4>Multiplier 1</h4>
+                        <p>Owned: <span id="mlty1Count">0</span> | Power: <span id="mlty1Power">2</span>x</p>
+                        <p>Cost: <span id="mlty1Cost">10</span> cookies</p>
+                        <button class="buy-button" onclick="buyMultiplier(1)">Buy</button>
+                    </div>
+
+                    <div class="shop-item">
+                        <h4>Multiplier 2</h4>
+                        <p>Owned: <span id="mlty2Count">0</span> | Power: <span id="mlty2Power">2</span>x</p>
+                        <p>Cost: <span id="mlty2Cost">100</span> cookies</p>
+                        <button class="buy-button" onclick="buyMultiplier(2)">Buy</button>
+                    </div>
+
+                    <div class="shop-item">
+                        <h4>Passive Income</h4>
+                        <p>Owned: <span id="psvCount">0</span> | +<span id="psvPower">1</span>/sec</p>
+                        <p>Cost: <span id="psvCost">1000</span> cookies</p>
+                        <button class="buy-button" onclick="buyPassive()">Buy</button>
+                    </div>
+
+                    <div class="shop-item">
+                        <h4>Rebirth</h4>
+                        <p>Rebirths: <span id="rbtCount">0</span> | Bonus: +<span id="rbtBonus">0.1</span>x</p>
+                        <p>Cost: <span id="rbtCost">1000000000</span> cookies</p>
+                        <button class="buy-button" onclick="rebirth()">Rebirth</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="settingsTab" class="tab-content">
+            <div class="tabs">
+                <button class="tab active" onclick="showSettingsTab('background')">Background</button>
+                <button class="tab" onclick="showSettingsTab('text')">Text</button>
+                <button class="tab" onclick="showSettingsTab('button')">Button</button>
+                <button class="tab" onclick="showSettingsTab('cookie')">Cookie</button>
+            </div>
+
+            <div id="backgroundSettings" class="tab-content active">
+                <div class="tabs">
+                    <button class="tab active" onclick="showColorTab('bg-presets')">Presets</button>
+                    <button class="tab" onclick="showColorTab('bg-rgb')">RGB</button>
+                    <button class="tab" onclick="showColorTab('bg-hsv')">HSV</button>
+                </div>
+
+                <div id="bg-presets" class="tab-content active">
+                    <div class="settings-section">
+                        <h4>Background Presets</h4>
+                        <div class="color-presets" id="bgPresets"></div>
+                    </div>
+                </div>
+
+                <div id="bg-rgb" class="tab-content">
+                    <div class="settings-section">
+                        <h4>RGB Controls</h4>
+                        <div class="slider-group">
+                            <label>Red: <span id="bgRValue">102</span></label>
+                            <input type="range" class="slider" min="0" max="255" value="102" id="bgR" oninput="updateBgRGB()">
+                        </div>
+                        <div class="slider-group">
+                            <label>Green: <span id="bgGValue">126</span></label>
+                            <input type="range" class="slider" min="0" max="255" value="126" id="bgG" oninput="updateBgRGB()">
+                        </div>
+                        <div class="slider-group">
+                            <label>Blue: <span id="bgBValue">234</span></label>
+                            <input type="range" class="slider" min="0" max="255" value="234" id="bgB" oninput="updateBgRGB()">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="bg-hsv" class="tab-content">
+                    <div class="settings-section">
+                        <h4>HSV Controls</h4>
+                        <div class="slider-group">
+                            <label>Hue: <span id="bgHValue">230</span></label>
+                            <input type="range" class="slider" min="0" max="360" value="230" id="bgH" oninput="updateBgHSV()">
+                        </div>
+                        <div class="slider-group">
+                            <label>Saturation: <span id="bgSValue">56</span></label>
+                            <input type="range" class="slider" min="0" max="100" value="56" id="bgS" oninput="updateBgHSV()">
+                        </div>
+                        <div class="slider-group">
+                            <label>Value: <span id="bgVValue">92</span></label>
+                            <input type="range" class="slider" min="0" max="100" value="92" id="bgV" oninput="updateBgHSV()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="textSettings" class="tab-content">
+                <div class="tabs">
+                    <button class="tab active" onclick="showColorTab('text-presets')">Presets</button>
+                    <button class="tab" onclick="showColorTab('text-rgb')">RGB</button>
+                    <button class="tab" onclick="showColorTab('text-hsv')">HSV</button>
+                    <button class="tab" onclick="showColorTab('text-group')">Group</button>
+                </div>
+
+                <div id="text-presets" class="tab-content active">
+                    <div class="settings-section">
+                        <h4>Text Color Presets</h4>
+                        <div class="color-presets" id="textPresets"></div>
+                    </div>
+                </div>
+
+                <div id="text-rgb" class="tab-content">
+                    <div class="settings-section">
+                        <h4>Text RGB Controls</h4>
+                        <div class="slider-group">
+                            <label>Red: <span id="textRValue">255</span></label>
+                            <input type="range" class="slider" min="0" max="255" value="255" id="textR" oninput="updateTextRGB()">
+                        </div>
+                        <div class="slider-group">
+                            <label>Green: <span id="textGValue">255</span></label>
+                            <input type="range" class="slider" min="0" max="255" value="255" id="textG" oninput="updateTextRGB()">
+                        </div>
+                        <div class="slider-group">
+                            <label>Blue: <span id="textBValue">255</span></label>
+                            <input type="range" class="slider" min="0" max="255" value="255" id="textB" oninput="updateTextRGB()">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="text-hsv" class="tab-content">
+                    <div class="settings-section">
+                        <h4>Text HSV Controls</h4>
+                        <div class="slider-group">
+                            <label>Hue: <span id="textHValue">0</span></label>
+                            <input type="range" class="slider" min="0" max="360" value="0" id="textH" oninput="updateTextHSV()">
+                        </div>
+                        <div class="slider-group">
+                            <label>Saturation: <span id="textSValue">0</span></label>
+                            <input type="range" class="slider" min="0" max="100" value="0" id="textS" oninput="updateTextHSV()">
+                        </div>
+                        <div class="slider-group">
+                            <label>Value: <span id="textVValue">100</span></label>
+                            <input type="range" class="slider" min="0" max="100" value="100" id="textV" oninput="updateTextHSV()">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="text-group" class="tab-content">
+                    <div class="settings-section">
+                        <h4>Group Text Controls</h4>
+                        <p>Control all text colors at once</p>
+                        <div class="tabs">
+                            <button class="tab active" onclick="showGroupTab('text-group-presets')">Presets</button>
+                            <button class="tab" onclick="showGroupTab('text-group-rgb')">RGB</button>
+                            <button class="tab" onclick="showGroupTab('text-group-hsv')">HSV</button>
+                        </div>
+                        <div id="text-group-presets" class="tab-content active">
+                            <div class="color-presets" id="textGroupPresets"></div>
+                        </div>
+                        <div id="text-group-rgb" class="tab-content">
+                            <div class="slider-group">
+                                <label>Red: <span id="textGroupRValue">255</span></label>
+                                <input type="range" class="slider" min="0" max="255" value="255" id="textGroupR" oninput="updateTextGroupRGB()">
+                            </div>
+                            <div class="slider-group">
+                                <label>Green: <span id="textGroupGValue">255</span></label>
+                                <input type="range" class="slider" min="0" max="255" value="255" id="textGroupG" oninput="updateTextGroupRGB()">
+                            </div>
+                            <div class="slider-group">
+                                <label>Blue: <span id="textGroupBValue">255</span></label>
+                                <input type="range" class="slider" min="0" max="255" value="255" id="textGroupB" oninput="updateTextGroupRGB()">
+                            </div>
+                        </div>
+                        <div id="text-group-hsv" class="tab-content">
+                            <div class="slider-group">
+                                <label>Hue: <span id="textGroupHValue">0</span></label>
+                                <input type="range" class="slider" min="0" max="360" value="0" id="textGroupH" oninput="updateTextGroupHSV()">
+                            </div>
+                            <div class="slider-group">
+                                <label>Saturation: <span id="textGroupSValue">0</span></label>
+                                <input type="range" class="slider" min="0" max="100" value="0" id="textGroupS" oninput="updateTextGroupHSV()">
+                            </div>
+                            <div class="slider-group">
+                                <label>Value: <span id="textGroupVValue">100</span></label>
+                                <input type="range" class="slider" min="0" max="100" value="100" id="textGroupV" oninput="updateTextGroupHSV()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="buttonSettings" class="tab-content">
+                <div class="tabs">
+                    <button class="tab active" onclick="showColorTab('button-presets')">Presets</button>
+                    <button class="tab" onclick="showColorTab('button-rgb')">RGB</button>
+                    <button class="tab" onclick="showColorTab('button-hsv')">HSV</button>
+                    <button class="tab" onclick="showColorTab('button-group')">Group</button>
+                </div>
+
+                <div id="button-presets" class="tab-content active">
+                    <div class="settings-section">
+                        <h4>Button Color Presets</h4>
+                        <div class="color-presets" id="buttonPresets"></div>
+                    </div>
+                </div>
+
+                <div id="button-rgb" class="tab-content">
+                    <div class="settings-section">
+                        <h4>Button RGB Controls</h4>
+                        <div class="slider-group">
+                            <label>Red: <span id="buttonRValue">76</span></label>
+                            <input type="range" class="slider" min="0" max="255" value="76" id="buttonR" oninput="updateButtonRGB()">
+                        </div>
+                        <div class="slider-group">
+                            <label>Green: <span id="buttonGValue">175</span></label>
+                            <input type="range" class="slider" min="0" max="255" value="175" id="buttonG" oninput="updateButtonRGB()">
+                        </div>
+                        <div class="slider-group">
+                            <label>Blue: <span id="buttonBValue">80</span></label>
+                            <input type="range" class="slider" min="0" max="255" value="80" id="buttonB" oninput="updateButtonRGB()">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="button-hsv" class="tab-content">
+                    <div class="settings-section">
+                        <h4>Button HSV Controls</h4>
+                        <div class="slider-group">
+                            <label>Hue: <span id="buttonHValue">123</span></label>
+                            <input type="range" class="slider" min="0" max="360" value="123" id="buttonH" oninput="updateButtonHSV()">
+                        </div>
+                        <div class="slider-group">
+                            <label>Saturation: <span id="buttonSValue">57</span></label>
+                            <input type="range" class="slider" min="0" max="100" value="57" id="buttonS" oninput="updateButtonHSV()">
+                        </div>
+                        <div class="slider-group">
+                            <label>Value: <span id="buttonVValue">69</span></label>
+                            <input type="range" class="slider" min="0" max="100" value="69" id="buttonV" oninput="updateButtonHSV()">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="button-group" class="tab-content">
+                    <div class="settings-section">
+                        <h4>Group Button Controls</h4>
+                        <p>Control all button colors at once</p>
+                        <div class="tabs">
+                            <button class="tab active" onclick="showGroupTab('button-group-presets')">Presets</button>
+                            <button class="tab" onclick="showGroupTab('button-group-rgb')">RGB</button>
+                            <button class="tab" onclick="showGroupTab('button-group-hsv')">HSV</button>
+                        </div>
+                        <div id="button-group-presets" class="tab-content active">
+                            <div class="color-presets" id="buttonGroupPresets"></div>
+                        </div>
+                        <div id="button-group-rgb" class="tab-content">
+                            <div class="slider-group">
+                                <label>Red: <span id="buttonGroupRValue">76</span></label>
+                                <input type="range" class="slider" min="0" max="255" value="76" id="buttonGroupR" oninput="updateButtonGroupRGB()">
+                            </div>
+                            <div class="slider-group">
+                                <label>Green: <span id="buttonGroupGValue">175</span></label>
+                                <input type="range" class="slider" min="0" max="255" value="175" id="buttonGroupG" oninput="updateButtonGroupRGB()">
+                            </div>
+                            <div class="slider-group">
+                                <label>Blue: <span id="buttonGroupBValue">80</span></label>
+                                <input type="range" class="slider" min="0" max="255" value="80" id="buttonGroupB" oninput="updateButtonGroupRGB()">
+                            </div>
+                        </div>
+                        <div id="button-group-hsv" class="tab-content">
+                            <div class="slider-group">
+                                <label>Hue: <span id="buttonGroupHValue">123</span></label>
+                                <input type="range" class="slider" min="0" max="360" value="123" id="buttonGroupH" oninput="updateButtonGroupHSV()">
+                            </div>
+                            <div class="slider-group">
+                                <label>Saturation: <span id="buttonGroupSValue">57</span></label>
+                                <input type="range" class="slider" min="0" max="100" value="57" id="buttonGroupS" oninput="updateButtonGroupHSV()">
+                            </div>
+                            <div class="slider-group">
+                                <label>Value: <span id="buttonGroupVValue">69</span></label>
+                                <input type="range" class="slider" min="0" max="100" value="69" id="buttonGroupV" oninput="updateButtonGroupHSV()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="cookieSettings" class="tab-content">
+                <div class="tabs">
+                    <button class="tab active" onclick="showColorTab('pastry-type')">Pastry Type</button>
+                    <button class="tab" onclick="showColorTab('cookie-location')">Cookie Location</button>
+                </div>
+
+                <div id="pastry-type" class="tab-content active">
+                    <div class="settings-section">
+                        <h4>Select Pastry Type</h4>
+                        <div class="pastry-options">
+                            <label class="pastry-option">
+                                <input type="radio" name="pastry" value="cookie" checked onchange="changePastryType()">
+                                <span>🍪 Cookie</span>
+                            </label>
+                            <label class="pastry-option">
+                                <input type="radio" name="pastry" value="cake" onchange="changePastryType()">
+                                <span>🍰 Cake</span>
+                            </label>
+                            <label class="pastry-option">
+                                <input type="radio" name="pastry" value="donut" onchange="changePastryType()">
+                                <span>🍩 Donut</span>
+                            </label>
+                            <label class="pastry-option">
+                                <input type="radio" name="pastry" value="cupcake" onchange="changePastryType()">
+                                <span>🧁 Cupcake</span>
+                            </label>
+                            <label class="pastry-option">
+                                <input type="radio" name="pastry" value="croissant" onchange="changePastryType()">
+                                <span>🥐 Croissant</span>
+                            </label>
+                            <label class="pastry-option">
+                                <input type="radio" name="pastry" value="pie" onchange="changePastryType()">
+                                <span>🥧 Pie</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="cookie-location" class="tab-content">
+                    <div class="settings-section">
+                        <h4 id="cookieLocationTitle">Cookie Location</h4>
+                        <div class="location-options">
+                            <label class="location-option">
+                                <input type="radio" name="location" value="tapped" checked onchange="changeCookieLocation()">
+                                <span>Where Tapped</span>
+                            </label>
+                            <label class="location-option">
+                                <input type="radio" name="location" value="random" onchange="changeCookieLocation()">
+                                <span>Random Position (Top)</span>
+                            </label>
+                            <label class="location-option">
+                                <input type="radio" name="location" value="none" onchange="changeCookieLocation()">
+                                <span>None</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="fallingCookies"></div>
+
+    <script>
+        // Game state
+        let gameState = {
+            cookies: 0,
+            totalClicks: 0,
+            mlty1: { count: 0, power: 2, cost: 10 },
+            mlty2: { count: 0, power: 2, cost: 100 },
+            psv: { count: 0, power: 1, cost: 1000 },
+            rbt: { count: 0, bonus: 0.1, cost: 1000000000 },
+            rebirthMultiplier: 1.0,
+            pastryType: 'cookie',
+            cookieLocation: 'tapped'
+        };
+
+        // Pastry data
+        const pastryData = {
+            cookie: { emoji: '🍪', name: 'Cookie', plural: 'Cookies' },
+            cake: { emoji: '🍰', name: 'Cake', plural: 'Cakes' },
+            donut: { emoji: '🍩', name: 'Donut', plural: 'Donuts' },
+            cupcake: { emoji: '🧁', name: 'Cupcake', plural: 'Cupcakes' },
+            croissant: { emoji: '🥐', name: 'Croissant', plural: 'Croissants' },
+            pie: { emoji: '🥧', name: 'Pie', plural: 'Pies' }
+        };
+
+        // Color presets
+        const colorPresets = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57',
+            '#FF9FF3', '#54A0FF', '#5F27CD', '#00D2D3', '#FF9F43',
+            '#FFFFFF', '#000000', '#FF0000', '#00FF00', '#0000FF',
+            '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080'
+        ];
+
+        // Initialize game
+        function init() {
+            updateDisplay();
+            updatePastryDisplay();
+            createColorPresets();
+            setInterval(passiveIncome, 1000);
+        }
+
+        // Cookie clicking
+        function clickCookie(event) {
+            let clickValue = 1;
+            
+            // Apply multipliers
+            if (gameState.mlty1.count > 0) {
+                clickValue *= gameState.mlty1.power;
+            }
+            if (gameState.mlty2.count > 0) {
+                clickValue *= gameState.mlty2.power;
+            }
+            
+            // Apply rebirth bonus
+            clickValue *= gameState.rebirthMultiplier;
+            
+            gameState.cookies += clickValue;
+            gameState.totalClicks++;
+            
+            // Handle falling cookies
+            if (gameState.cookieLocation !== 'none') {
+                createFallingCookie(event);
+            }
+            
+            updateDisplay();
+        }
+
+        // Buy multiplier
+        function buyMultiplier(type) {
+            const mlty = type === 1 ? gameState.mlty1 : gameState.mlty2;
+            
+            if (gameState.cookies >= mlty.cost) {
+                gameState.cookies -= mlty.cost;
+                mlty.count++;
+                mlty.cost *= 2;
+                mlty.power *= 2;
+                updateDisplay();
+            }
+        }
+
+        // Buy passive income
+        function buyPassive() {
+            if (gameState.cookies >= gameState.psv.cost) {
+                gameState.cookies -= gameState.psv.cost;
+                gameState.psv.count++;
+                gameState.psv.cost += 1000;
+                updateDisplay();
+            }
+        }
+
+        // Rebirth system
+        function rebirth() {
+            if (gameState.cookies >= gameState.rbt.cost) {
+                // Reset everything except rebirth stats
+                gameState.cookies = 0;
+                gameState.totalClicks = 0;
+                gameState.mlty1 = { count: 0, power: 2, cost: 10 };
+                gameState.mlty2 = { count: 0, power: 2, cost: 100 };
+                gameState.psv = { count: 0, power: 1, cost: 1000 };
+                
+                // Increase rebirth bonus
+                gameState.rebirthMultiplier += gameState.rbt.bonus;
+                gameState.rbt.count++;
+                gameState.rbt.cost *= 2;
+                gameState.rbt.bonus *= 2;
+                
+                updateDisplay();
+            }
+        }
+
+        // Passive income
+        function passiveIncome() {
+            if (gameState.psv.count > 0) {
+                const income = gameState.psv.count * gameState.psv.power * gameState.rebirthMultiplier;
+                gameState.cookies += income;
+                updateDisplay();
+            }
+        }
+
+        // Update display
+        function updateDisplay() {
+            const pastry = pastryData[gameState.pastryType];
+            
+            document.getElementById('cookieCount').textContent = Math.floor(gameState.cookies).toLocaleString();
+            document.getElementById('totalClicks').textContent = gameState.totalClicks.toLocaleString();
+            document.getElementById('rebirthBonus').textContent = gameState.rebirthMultiplier.toFixed(1) + 'x';
+            document.getElementById('cps').textContent = (gameState.psv.count * gameState.psv.power * gameState.rebirthMultiplier).toFixed(1);
+            
+            // Update display text with pastry names
+            document.getElementById('cpsDisplay').innerHTML = `${pastry.plural} per second: <span id="cps">${(gameState.psv.count * gameState.psv.power * gameState.rebirthMultiplier).toFixed(1)}</span>`;
+            
+            // Multiplier 1
+            document.getElementById('mlty1Count').textContent = gameState.mlty1.count;
+            document.getElementById('mlty1Power').textContent = gameState.mlty1.power;
+            document.getElementById('mlty1Cost').textContent = gameState.mlty1.cost.toLocaleString() + ' ' + pastry.plural.toLowerCase();
+            
+            // Multiplier 2
+            document.getElementById('mlty2Count').textContent = gameState.mlty2.count;
+            document.getElementById('mlty2Power').textContent = gameState.mlty2.power;
+            document.getElementById('mlty2Cost').textContent = gameState.mlty2.cost.toLocaleString() + ' ' + pastry.plural.toLowerCase();
+            
+            // Passive
+            document.getElementById('psvCount').textContent = gameState.psv.count;
+            document.getElementById('psvPower').textContent = gameState.psv.power;
+            document.getElementById('psvCost').textContent = gameState.psv.cost.toLocaleString() + ' ' + pastry.plural.toLowerCase();
+            
+            // Rebirth
+            document.getElementById('rbtCount').textContent = gameState.rbt.count;
+            document.getElementById('rbtBonus').textContent = gameState.rbt.bonus.toFixed(1);
+            document.getElementById('rbtCost').textContent = gameState.rbt.cost.toLocaleString() + ' ' + pastry.plural.toLowerCase();
+        }
+
+        // Tab management
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function showSettingsTab(tabName) {
+            // Hide all settings tab contents
+            document.querySelectorAll('#settingsTab .tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active from settings tabs
+            document.querySelectorAll('#settingsTab .tabs .tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected settings tab
+            document.getElementById(tabName + 'Settings').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function showColorTab(tabName) {
+            // Get parent container
+            const parent = event.target.closest('.tab-content');
+            
+            // Hide all color tab contents in this parent
+            parent.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active from color tabs in this parent
+            parent.querySelectorAll('.tabs .tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected color tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function showGroupTab(tabName) {
+            // Get parent container
+            const parent = event.target.closest('.settings-section');
+            
+            // Hide all group tab contents in this parent
+            parent.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active from group tabs in this parent
+            parent.querySelectorAll('.tabs .tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected group tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Color management
+        function createColorPresets() {
+            const containers = [
+                'bgPresets', 'textPresets', 'buttonPresets',
+                'textGroupPresets', 'buttonGroupPresets'
+            ];
+            
+            containers.forEach(containerId => {
+                const container = document.getElementById(containerId);
+                container.innerHTML = '';
+                
+                colorPresets.forEach(color => {
+                    const preset = document.createElement('div');
+                    preset.className = 'color-preset';
+                    preset.style.backgroundColor = color;
+                    preset.addEventListener('click', () => applyPresetColor(containerId, color));
+                    container.appendChild(preset);
+                });
+            });
+        }
+
+        function applyPresetColor(type, color) {
+            const rgb = hexToRgb(color);
+            const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+            
+            switch(type) {
+                case 'bgPresets':
+                    updateBackground(color);
+                    updateBgSliders(rgb, hsv);
+                    break;
+                case 'textPresets':
+                    updateTextColor(color);
+                    updateTextSliders(rgb, hsv);
+                    break;
+                case 'buttonPresets':
+                    updateButtonColor(color);
+                    updateButtonSliders(rgb, hsv);
+                    break;
+                case 'textGroupPresets':
+                    updateTextColor(color);
+                    updateTextGroupSliders(rgb, hsv);
+                    break;
+                case 'buttonGroupPresets':
+                    updateButtonColor(color);
+                    updateButtonGroupSliders(rgb, hsv);
+                    break;
+            }
+        }
+
+        // Background color updates
+        function updateBgRGB() {
+            const r = document.getElementById('bgR').value;
+            const g = document.getElementById('bgG').value;
+            const b = document.getElementById('bgB').value;
+            
+            document.getElementById('bgRValue').textContent = r;
+            document.getElementById('bgGValue').textContent = g;
+            document.getElementById('bgBValue').textContent = b;
+            
+            const color = `rgb(${r}, ${g}, ${b})`;
+            updateBackground(color);
+            
+            // Update HSV sliders
+            const hsv = rgbToHsv(parseInt(r), parseInt(g), parseInt(b));
+            updateBgHSVSliders(hsv);
+        }
+
+        function updateBgHSV() {
+            const h = document.getElementById('bgH').value;
+            const s = document.getElementById('bgS').value;
+            const v = document.getElementById('bgV').value;
+            
+            document.getElementById('bgHValue').textContent = h;
+            document.getElementById('bgSValue').textContent = s;
+            document.getElementById('bgVValue').textContent = v;
+            
+            const rgb = hsvToRgb(parseInt(h), parseInt(s) / 100, parseInt(v) / 100);
+            const color = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+            updateBackground(color);
+            
+            // Update RGB sliders
+            updateBgRGBSliders(rgb);
+        }
+
+        function updateBackground(color) {
+            const rgb = color.startsWith('rgb') ? color : hexToRgb(color);
+            const rgbStr = typeof rgb === 'string' ? rgb : `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+            
+            // Create gradient effect
+            const darker = adjustBrightness(rgbStr, -20);
+            document.body.style.background = `linear-gradient(135deg, ${rgbStr} 0%, ${darker} 100%)`;
+        }
+
+        // Text color updates
+        function updateTextRGB() {
+            const r = document.getElementById('textR').value;
+            const g = document.getElementById('textG').value;
+            const b = document.getElementById('textB').value;
+            
+            document.getElementById('textRValue').textContent = r;
+            document.getElementById('textGValue').textContent = g;
+            document.getElementById('textBValue').textContent = b;
+            
+            const color = `rgb(${r}, ${g}, ${b})`;
+            updateTextColor(color);
+            
+            // Update HSV sliders
+            const hsv = rgbToHsv(parseInt(r), parseInt(g), parseInt(b));
+            updateTextHSVSliders(hsv);
+        }
+
+        function updateTextHSV() {
+            const h = document.getElementById('textH').value;
+            const s = document.getElementById('textS').value;
+            const v = document.getElementById('textV').value;
+            
+            document.getElementById('textHValue').textContent = h;
+            document.getElementById('textSValue').textContent = s;
+            document.getElementById('textVValue').textContent = v;
+            
+            const rgb = hsvToRgb(parseInt(h), parseInt(s) / 100, parseInt(v) / 100);
+            const color = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+            updateTextColor(color);
+            
+            // Update RGB sliders
+            updateTextRGBSliders(rgb);
+        }
+
+        function updateTextColor(color) {
+            document.body.style.color = color;
+        }
+
+        // Text group updates
+        function updateTextGroupRGB() {
+            const r = document.getElementById('textGroupR').value;
+            const g = document.getElementById('textGroupG').value;
+            const b = document.getElementById('textGroupB').value;
+            
+            document.getElementById('textGroupRValue').textContent = r;
+            document.getElementById('textGroupGValue').textContent = g;
+            document.getElementById('textGroupBValue').textContent = b;
+            
+            const color = `rgb(${r}, ${g}, ${b})`;
+            updateTextColor(color);
+            
+            // Update individual text sliders too
+            updateTextSliders({r: parseInt(r), g: parseInt(g), b: parseInt(b)}, rgbToHsv(parseInt(r), parseInt(g), parseInt(b)));
+            
+            // Update HSV sliders
+            const hsv = rgbToHsv(parseInt(r), parseInt(g), parseInt(b));
+            updateTextGroupHSVSliders(hsv);
+        }
+
+        function updateTextGroupHSV() {
+            const h = document.getElementById('textGroupH').value;
+            const s = document.getElementById('textGroupS').value;
+            const v = document.getElementById('textGroupV').value;
+            
+            document.getElementById('textGroupHValue').textContent = h;
+            document.getElementById('textGroupSValue').textContent = s;
+            document.getElementById('textGroupVValue').textContent = v;
+            
+            const rgb = hsvToRgb(parseInt(h), parseInt(s) / 100, parseInt(v) / 100);
+            const color = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+            updateTextColor(color);
+            
+            // Update individual text sliders too
+            updateTextSliders(rgb, {h: parseInt(h), s: parseInt(s), v: parseInt(v)});
+            
+            // Update RGB sliders
+            updateTextGroupRGBSliders(rgb);
+        }
+
+        // Button color updates
+        function updateButtonRGB() {
+            const r = document.getElementById('buttonR').value;
+            const g = document.getElementById('buttonG').value;
+            const b = document.getElementById('buttonB').value;
+            
+            document.getElementById('buttonRValue').textContent = r;
+            document.getElementById('buttonGValue').textContent = g;
+            document.getElementById('buttonBValue').textContent = b;
+            
+            const color = `rgb(${r}, ${g}, ${b})`;
+            updateButtonColor(color);
+            
+            // Update HSV sliders
+            const hsv = rgbToHsv(parseInt(r), parseInt(g), parseInt(b));
+            updateButtonHSVSliders(hsv);
+        }
+
+        function updateButtonHSV() {
+            const h = document.getElementById('buttonH').value;
+            const s = document.getElementById('buttonS').value;
+            const v = document.getElementById('buttonV').value;
+            
+            document.getElementById('buttonHValue').textContent = h;
+            document.getElementById('buttonSValue').textContent = s;
+            document.getElementById('buttonVValue').textContent = v;
+            
+            const rgb = hsvToRgb(parseInt(h), parseInt(s) / 100, parseInt(v) / 100);
+            const color = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+            updateButtonColor(color);
+            
+            // Update RGB sliders
+            updateButtonRGBSliders(rgb);
+        }
+
+        function updateButtonColor(color) {
+            const rgb = color.startsWith('rgb') ? color : hexToRgb(color);
+            const rgbStr = typeof rgb === 'string' ? rgb : `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+            const darker = adjustBrightness(rgbStr, -10);
+            
+            // Update all buttons
+            const style = document.createElement('style');
+            style.textContent = `
+                .buy-button {
+                    background: linear-gradient(45deg, ${rgbStr}, ${darker}) !important;
+                }
+                .buy-button:hover {
+                    background: linear-gradient(45deg, ${darker}, ${rgbStr}) !important;
+                }
+            `;
+            
+            // Remove existing button styles
+            const existingStyle = document.getElementById('buttonStyle');
+            if (existingStyle) existingStyle.remove();
+            
+            style.id = 'buttonStyle';
+            document.head.appendChild(style);
+        }
+
+        // Button group updates
+        function updateButtonGroupRGB() {
+            const r = document.getElementById('buttonGroupR').value;
+            const g = document.getElementById('buttonGroupG').value;
+            const b = document.getElementById('buttonGroupB').value;
+            
+            document.getElementById('buttonGroupRValue').textContent = r;
+            document.getElementById('buttonGroupGValue').textContent = g;
+            document.getElementById('buttonGroupBValue').textContent = b;
+            
+            const color = `rgb(${r}, ${g}, ${b})`;
+            updateButtonColor(color);
+            
+            // Update individual button sliders too
+            updateButtonSliders({r: parseInt(r), g: parseInt(g), b: parseInt(b)}, rgbToHsv(parseInt(r), parseInt(g), parseInt(b)));
+            
+            // Update HSV sliders
+            const hsv = rgbToHsv(parseInt(r), parseInt(g), parseInt(b));
+            updateButtonGroupHSVSliders(hsv);
+        }
+
+        function updateButtonGroupHSV() {
+            const h = document.getElementById('buttonGroupH').value;
+            const s = document.getElementById('buttonGroupS').value;
+            const v = document.getElementById('buttonGroupV').value;
+            
+            document.getElementById('buttonGroupHValue').textContent = h;
+            document.getElementById('buttonGroupSValue').textContent = s;
+            document.getElementById('buttonGroupVValue').textContent = v;
+            
+            const rgb = hsvToRgb(parseInt(h), parseInt(s) / 100, parseInt(v) / 100);
+            const color = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+            updateButtonColor(color);
+            
+            // Update individual button sliders too
+            updateButtonSliders(rgb, {h: parseInt(h), s: parseInt(s), v: parseInt(v)});
+            
+            // Update RGB sliders
+            updateButtonGroupRGBSliders(rgb);
+        }
+
+        // Slider update helpers
+        function updateBgSliders(rgb, hsv) {
+            updateBgRGBSliders(rgb);
+            updateBgHSVSliders(hsv);
+        }
+
+        function updateBgRGBSliders(rgb) {
+            document.getElementById('bgR').value = rgb.r;
+            document.getElementById('bgG').value = rgb.g;
+            document.getElementById('bgB').value = rgb.b;
+            document.getElementById('bgRValue').textContent = rgb.r;
+            document.getElementById('bgGValue').textContent = rgb.g;
+            document.getElementById('bgBValue').textContent = rgb.b;
+        }
+
+        function updateBgHSVSliders(hsv) {
+            document.getElementById('bgH').value = Math.round(hsv.h);
+            document.getElementById('bgS').value = Math.round(hsv.s);
+            document.getElementById('bgV').value = Math.round(hsv.v);
+            document.getElementById('bgHValue').textContent = Math.round(hsv.h);
+            document.getElementById('bgSValue').textContent = Math.round(hsv.s);
+            document.getElementById('bgVValue').textContent = Math.round(hsv.v);
+        }
+
+        function updateTextSliders(rgb, hsv) {
+            updateTextRGBSliders(rgb);
+            updateTextHSVSliders(hsv);
+        }
+
+        function updateTextRGBSliders(rgb) {
+            document.getElementById('textR').value = rgb.r;
+            document.getElementById('textG').value = rgb.g;
+            document.getElementById('textB').value = rgb.b;
+            document.getElementById('textRValue').textContent = rgb.r;
+            document.getElementById('textGValue').textContent = rgb.g;
+            document.getElementById('textBValue').textContent = rgb.b;
+        }
+
+        function updateTextHSVSliders(hsv) {
+            document.getElementById('textH').value = Math.round(hsv.h);
+            document.getElementById('textS').value = Math.round(hsv.s);
+            document.getElementById('textV').value = Math.round(hsv.v);
+            document.getElementById('textHValue').textContent = Math.round(hsv.h);
+            document.getElementById('textSValue').textContent = Math.round(hsv.s);
+            document.getElementById('textVValue').textContent = Math.round(hsv.v);
+        }
+
+        function updateTextGroupSliders(rgb, hsv) {
+            updateTextGroupRGBSliders(rgb);
+            updateTextGroupHSVSliders(hsv);
+        }
+
+        function updateTextGroupRGBSliders(rgb) {
+            document.getElementById('textGroupR').value = rgb.r;
+            document.getElementById('textGroupG').value = rgb.g;
+            document.getElementById('textGroupB').value = rgb.b;
+            document.getElementById('textGroupRValue').textContent = rgb.r;
+            document.getElementById('textGroupGValue').textContent = rgb.g;
+            document.getElementById('textGroupBValue').textContent = rgb.b;
+        }
+
+        function updateTextGroupHSVSliders(hsv) {
+            document.getElementById('textGroupH').value = Math.round(hsv.h);
+            document.getElementById('textGroupS').value = Math.round(hsv.s);
+            document.getElementById('textGroupV').value = Math.round(hsv.v);
+            document.getElementById('textGroupHValue').textContent = Math.round(hsv.h);
+            document.getElementById('textGroupSValue').textContent = Math.round(hsv.s);
+            document.getElementById('textGroupVValue').textContent = Math.round(hsv.v);
+        }
+
+        function updateButtonSliders(rgb, hsv) {
+            updateButtonRGBSliders(rgb);
+            updateButtonHSVSliders(hsv);
+        }
+
+        function updateButtonRGBSliders(rgb) {
+            document.getElementById('buttonR').value = rgb.r;
+            document.getElementById('buttonG').value = rgb.g;
+            document.getElementById('buttonB').value = rgb.b;
+            document.getElementById('buttonRValue').textContent = rgb.r;
+            document.getElementById('buttonGValue').textContent = rgb.g;
+            document.getElementById('buttonBValue').textContent = rgb.b;
+        }
+
+        function updateButtonHSVSliders(hsv) {
+            document.getElementById('buttonH').value = Math.round(hsv.h);
+            document.getElementById('buttonS').value = Math.round(hsv.s);
+            document.getElementById('buttonV').value = Math.round(hsv.v);
+            document.getElementById('buttonHValue').textContent = Math.round(hsv.h);
+            document.getElementById('buttonSValue').textContent = Math.round(hsv.s);
+            document.getElementById('buttonVValue').textContent = Math.round(hsv.v);
+        }
+
+        function updateButtonGroupSliders(rgb, hsv) {
+            updateButtonGroupRGBSliders(rgb);
+            updateButtonGroupHSVSliders(hsv);
+        }
+
+        function updateButtonGroupRGBSliders(rgb) {
+            document.getElementById('buttonGroupR').value = rgb.r;
+            document.getElementById('buttonGroupG').value = rgb.g;
+            document.getElementById('buttonGroupB').value = rgb.b;
+            document.getElementById('buttonGroupRValue').textContent = rgb.r;
+            document.getElementById('buttonGroupGValue').textContent = rgb.g;
+            document.getElementById('buttonGroupBValue').textContent = rgb.b;
+        }
+
+        function updateButtonGroupHSVSliders(hsv) {
+            document.getElementById('buttonGroupH').value = Math.round(hsv.h);
+            document.getElementById('buttonGroupS').value = Math.round(hsv.s);
+            document.getElementById('buttonGroupV').value = Math.round(hsv.v);
+            document.getElementById('buttonGroupHValue').textContent = Math.round(hsv.h);
+            document.getElementById('buttonGroupSValue').textContent = Math.round(hsv.s);
+            document.getElementById('buttonGroupVValue').textContent = Math.round(hsv.v);
+        }
+
+        // Color conversion utilities
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function rgbToHsv(r, g, b) {
+            r /= 255;
+            g /= 255;
+            b /= 255;
+            
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            const diff = max - min;
+            
+            let h = 0;
+            if (diff !== 0) {
+                if (max === r) h = ((g - b) / diff) % 6;
+                else if (max === g) h = (b - r) / diff + 2;
+                else h = (r - g) / diff + 4;
+            }
+            h = Math.round(h * 60);
+            if (h < 0) h += 360;
+            
+            const s = max === 0 ? 0 : Math.round((diff / max) * 100);
+            const v = Math.round(max * 100);
+            
+            return { h, s, v };
+        }
+
+        function hsvToRgb(h, s, v) {
+            const c = v * s;
+            const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+            const m = v - c;
+            
+            let r = 0, g = 0, b = 0;
+            
+            if (h >= 0 && h < 60) {
+                r = c; g = x; b = 0;
+            } else if (h >= 60 && h < 120) {
+                r = x; g = c; b = 0;
+            } else if (h >= 120 && h < 180) {
+                r = 0; g = c; b = x;
+            } else if (h >= 180 && h < 240) {
+                r = 0; g = x; b = c;
+            } else if (h >= 240 && h < 300) {
+                r = x; g = 0; b = c;
+            } else if (h >= 300 && h < 360) {
+                r = c; g = 0; b = x;
+            }
+            
+            return {
+                r: Math.round((r + m) * 255),
+                g: Math.round((g + m) * 255),
+                b: Math.round((b + m) * 255)
+            };
+        }
+
+        function adjustBrightness(rgbStr, percent) {
+            const match = rgbStr.match(/\d+/g);
+            if (!match) return rgbStr;
+            
+            const r = Math.max(0, Math.min(255, parseInt(match[0]) + percent));
+            const g = Math.max(0, Math.min(255, parseInt(match[1]) + percent));
+            const b = Math.max(0, Math.min(255, parseInt(match[2]) + percent));
+            
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // Pastry type management
+        function changePastryType() {
+            const selected = document.querySelector('input[name="pastry"]:checked').value;
+            gameState.pastryType = selected;
+            updatePastryDisplay();
+            updateDisplay();
+        }
+
+        function updatePastryDisplay() {
+            const pastry = pastryData[gameState.pastryType];
+            document.getElementById('cookieEmoji').textContent = pastry.emoji;
+            document.getElementById('cookieButtonText').textContent = `Click Me!`;
+            document.getElementById('cookieLocationTitle').textContent = `${pastry.name} Location`;
+            document.title = `${pastry.name} Clicker`;
+        }
+
+        // Cookie location and falling animation
+        function changeCookieLocation() {
+            const selected = document.querySelector('input[name="location"]:checked').value;
+            gameState.cookieLocation = selected;
+        }
+
+        function createFallingCookie(event) {
+            const pastry = pastryData[gameState.pastryType];
+            const fallingCookie = document.createElement('div');
+            fallingCookie.className = 'falling-cookie';
+            fallingCookie.textContent = pastry.emoji;
+            
+            let x;
+            if (gameState.cookieLocation === 'tapped' && event) {
+                x = event.clientX;
+            } else if (gameState.cookieLocation === 'random') {
+                x = Math.random() * (window.innerWidth - 50);
+            } else {
+                return; // none option
+            }
+            
+            fallingCookie.style.left = x + 'px';
+            fallingCookie.style.top = '-50px';
+            
+            document.getElementById('fallingCookies').appendChild(fallingCookie);
+            
+            // Remove the element after animation
+            setTimeout(() => {
+                if (fallingCookie.parentNode) {
+                    fallingCookie.parentNode.removeChild(fallingCookie);
+                }
+            }, 2000);
+        }
+
+        // Initialize the game when page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
