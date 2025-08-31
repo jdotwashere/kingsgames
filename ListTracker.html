@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1200px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -95,10 +95,10 @@
         }
 
         .btn {
-            padding: 12px 20px;
+            padding: 10px 16px;
             border: none;
-            border-radius: 10px;
-            font-size: 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -133,13 +133,40 @@
 
         .add-form {
             display: grid;
-            grid-template-columns: 2fr 1fr 2fr 1fr;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
             gap: 15px;
             margin-bottom: 30px;
             padding: 25px;
             background: rgba(255, 255, 255, 0.8);
             border-radius: 15px;
             border: 2px solid rgba(103, 126, 234, 0.3);
+        }
+
+        .form-group.name {
+            grid-row: 1;
+            grid-column: 1;
+        }
+
+        .form-group.price {
+            grid-row: 1;
+            grid-column: 2;
+        }
+
+        .form-group.quantity {
+            grid-row: 2;
+            grid-column: 1;
+        }
+
+        .form-group.link {
+            grid-row: 2;
+            grid-column: 2;
+        }
+
+        .form-group.button {
+            grid-row: 2;
+            grid-column: 2;
+            margin-top: 10px;
         }
 
         .form-group {
@@ -162,6 +189,7 @@
             border-radius: 8px;
             font-size: 1rem;
             transition: border-color 0.3s ease;
+            width: 100%;
         }
 
         .form-group input:focus {
@@ -204,6 +232,7 @@
             border-radius: 15px;
             overflow: hidden;
             border: 2px solid rgba(103, 126, 234, 0.2);
+            margin-bottom: 20px;
         }
 
         .items-header {
@@ -222,6 +251,7 @@
             padding: 15px;
             border-bottom: 1px solid rgba(103, 126, 234, 0.1);
             transition: all 0.3s ease;
+            position: relative;
         }
 
         .item:hover {
@@ -236,6 +266,35 @@
         .item-name {
             font-weight: 600;
             color: #2c3e50;
+            position: relative;
+        }
+
+        .item-name-quantity {
+            position: absolute;
+            top: -10px;
+            right: -150px;
+            background: linear-gradient(45deg, #2F0404, #253da3);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            min-width: 16px;
+            text-align: center;
+            line-height: 1.2;
+            border: none;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .item-name-quantity:focus {
+            background: linear-gradient(45deg, #44a08d, #4ecdc4);
+            box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.3);
+        }
+
+        .item-name-quantity:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(78, 205, 196, 0.4);
         }
 
         .item-price {
@@ -255,6 +314,10 @@
 
         .item-link:hover {
             text-decoration: underline;
+        }
+
+        .item-quantity {
+            display: none;
         }
 
         .delete-btn {
@@ -288,6 +351,151 @@
             font-size: 1.5rem;
         }
 
+        /* Notification Styles */
+        .notifications-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 350px;
+        }
+
+        .notification {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid rgba(255, 154, 158, 0.3);
+            border-radius: 12px;
+            padding: 15px 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            transform: translateX(100%);
+            animation: slideIn 0.3s ease-out forwards;
+            cursor: pointer;
+        }
+
+        .notification.warning {
+            border-color: rgba(255, 193, 7, 0.5);
+            background: rgba(255, 248, 220, 0.95);
+        }
+
+        .notification.success {
+            border-color: rgba(78, 205, 196, 0.5);
+            background: rgba(220, 255, 248, 0.95);
+        }
+
+        .notification.error {
+            border-color: rgba(255, 154, 158, 0.5);
+            background: rgba(255, 240, 245, 0.95);
+        }
+
+        .notification-close {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #666;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-close:hover {
+            color: #333;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            padding-right: 20px;
+        }
+
+        .notification-message {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        @keyframes slideIn {
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOut {
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        /* Duplicate Links Section */
+        .duplicates-section {
+            background: rgba(255, 248, 220, 0.9);
+            border: 2px solid rgba(255, 193, 7, 0.3);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .duplicates-header {
+            background: linear-gradient(45deg, #ffc107, #ff8f00);
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .duplicates-content {
+            padding: 20px;
+        }
+
+        .duplicate-group {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .duplicate-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .duplicate-link {
+            font-weight: 600;
+            color: #e67e22;
+            margin-bottom: 10px;
+            word-break: break-all;
+        }
+
+        .duplicate-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .duplicate-item {
+            background: rgba(255, 193, 7, 0.2);
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #8b5e00;
+        }
+
         @media (max-width: 768px) {
             .add-form {
                 grid-template-columns: 1fr;
@@ -297,6 +505,13 @@
                 grid-template-columns: 1fr;
                 gap: 10px;
                 text-align: left;
+                padding-bottom: 40px;
+            }
+
+            .item-quantity {
+                top: auto;
+                bottom: 10px;
+                right: 10px;
             }
             
             .controls {
@@ -307,10 +522,18 @@
                 position: static;
                 margin-top: 10px;
             }
+
+            .notifications-container {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="notifications-container" id="notificationsContainer"></div>
+
     <div class="container">
         <div class="header">
             <h1>List Tracker</h1>
@@ -331,21 +554,22 @@
         </div>
 
         <div class="add-form">
-            <div class="form-group">
+            <div class="form-group name">
                 <label>Item Name</label>
                 <input type="text" id="itemName" placeholder="Enter item name">
             </div>
-            <div class="form-group">
+            <div class="form-group price">
                 <label>Price ($)</label>
                 <input type="number" id="itemPrice" placeholder="0.00" step="0.01" min="0">
             </div>
-            <div class="form-group">
+            <div class="form-group quantity">
+                <label>Quantity</label>
+                <input type="number" id="itemQuantity" placeholder="1" min="1" value="1">
+            </div>
+            <div class="form-group link">
                 <label>Link (Optional)</label>
                 <input type="url" id="itemLink" placeholder="https://...">
-            </div>
-            <div class="form-group">
-                <label>&nbsp;</label>
-                <button class="btn btn-primary" onclick="addItem()">Add Item</button>
+                <button class="btn btn-primary" onclick="addItem()" style="margin-top: 10px;">Add Item</button>
             </div>
         </div>
 
@@ -377,6 +601,14 @@
                 </div>
             </div>
         </div>
+
+        <div id="duplicatesSection" class="duplicates-section" style="display: none;">
+            <div class="duplicates-header">
+                <span>⚠️</span>
+                <span>Duplicate Links Detected</span>
+            </div>
+            <div class="duplicates-content" id="duplicatesContent"></div>
+        </div>
     </div>
 
     <script>
@@ -403,13 +635,51 @@
             });
         };
 
+        function showNotification(title, message, type = 'info', duration = 5000) {
+            const container = document.getElementById('notificationsContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            notification.innerHTML = `
+                <button class="notification-close" onclick="removeNotification(this.parentElement)">&times;</button>
+                <div class="notification-title">${title}</div>
+                <div class="notification-message">${message}</div>
+            `;
+            
+            container.appendChild(notification);
+            
+            // Auto remove after duration
+            setTimeout(() => {
+                removeNotification(notification);
+            }, duration);
+            
+            // Remove on click (swipe simulation)
+            notification.addEventListener('click', (e) => {
+                if (e.target.className !== 'notification-close') {
+                    removeNotification(notification);
+                }
+            });
+        }
+
+        function removeNotification(notification) {
+            if (notification && notification.parentElement) {
+                notification.style.animation = 'slideOut 0.3s ease-in forwards';
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.parentElement.removeChild(notification);
+                    }
+                }, 300);
+            }
+        }
+
         function addItem() {
             const name = document.getElementById('itemName').value.trim();
             const price = parseFloat(document.getElementById('itemPrice').value) || 0;
+            const quantity = parseInt(document.getElementById('itemQuantity').value) || 1;
             const link = document.getElementById('itemLink').value.trim();
 
             if (!name) {
-                alert('Please enter an item name');
+                showNotification('Missing Information', 'Please enter an item name', 'error');
                 return;
             }
 
@@ -417,6 +687,7 @@
                 id: Date.now(),
                 name: name,
                 price: price,
+                quantity: quantity,
                 link: link
             };
 
@@ -424,16 +695,44 @@
             
             document.getElementById('itemName').value = '';
             document.getElementById('itemPrice').value = '';
+            document.getElementById('itemQuantity').value = '1';
             document.getElementById('itemLink').value = '';
 
             updateDisplay();
             saveData();
+            checkDuplicates();
+            
+            showNotification('Item Added', `"${name}" has been added to your list`, 'success');
+        }
+
+        function updateQuantity(id, newQuantity) {
+            const quantity = parseInt(newQuantity) || 1;
+            const item = items.find(item => item.id === id);
+            
+            if (item && quantity > 0) {
+                const oldQuantity = item.quantity;
+                item.quantity = quantity;
+                updateDisplay();
+                saveData();
+                checkDuplicates();
+                
+                if (oldQuantity !== quantity) {
+                    showNotification('Quantity Updated', 
+                        `"${item.name}" quantity changed from ${oldQuantity} to ${quantity}`, 'success', 3000);
+                }
+            }
         }
 
         function deleteItem(id) {
+            const item = items.find(item => item.id === id);
             items = items.filter(item => item.id !== id);
             updateDisplay();
             saveData();
+            checkDuplicates();
+            
+            if (item) {
+                showNotification('Item Removed', `"${item.name}" has been removed from your list`, 'info');
+            }
         }
 
         function updateDisplay() {
@@ -449,8 +748,11 @@
             } else {
                 itemsList.innerHTML = items.map(item => `
                     <div class="item">
-                        <div class="item-name">${item.name}</div>
-                        <div class="item-price">$${item.price.toFixed(2)}</div>
+                        <div class="item-name">
+                            ${item.name}
+                            <span class="item-name-quantity">${item.quantity}</span>
+                        </div>
+                        <div class="item-price">${(item.price * item.quantity).toFixed(2)}</div>
                         <div class="item-link">
                             ${item.link ? `<a href="${item.link}" target="_blank">${item.link}</a>` : 'No link'}
                         </div>
@@ -463,14 +765,51 @@
         }
 
         function updateSummary() {
-            const subtotal = items.reduce((sum, item) => sum + item.price, 0);
+            const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const taxAmount = (subtotal * taxRate) / 100;
             const total = subtotal + taxAmount;
+            const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
             document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
             document.getElementById('tax').textContent = `$${taxAmount.toFixed(2)}`;
             document.getElementById('total').textContent = `$${total.toFixed(2)}`;
-            document.getElementById('itemCount').textContent = items.length;
+            document.getElementById('itemCount').textContent = totalItems;
+        }
+
+        function checkDuplicates() {
+            const duplicatesSection = document.getElementById('duplicatesSection');
+            const duplicatesContent = document.getElementById('duplicatesContent');
+            
+            // Group items by link (excluding empty links)
+            const linkGroups = {};
+            items.forEach(item => {
+                if (item.link && item.link.trim() !== '') {
+                    const normalizedLink = item.link.trim().toLowerCase();
+                    if (!linkGroups[normalizedLink]) {
+                        linkGroups[normalizedLink] = [];
+                    }
+                    linkGroups[normalizedLink].push(item);
+                }
+            });
+
+            // Find groups with more than one item
+            const duplicates = Object.entries(linkGroups).filter(([link, items]) => items.length > 1);
+
+            if (duplicates.length > 0) {
+                duplicatesContent.innerHTML = duplicates.map(([link, duplicateItems]) => `
+                    <div class="duplicate-group">
+                        <div class="duplicate-link">${duplicateItems[0].link}</div>
+                        <div class="duplicate-items">
+                            ${duplicateItems.map(item => `
+                                <span class="duplicate-item">${item.name} (${item.quantity}x)</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+                duplicatesSection.style.display = 'block';
+            } else {
+                duplicatesSection.style.display = 'none';
+            }
         }
 
         function saveData() {
@@ -488,10 +827,19 @@
                     const data = JSON.parse(savedData);
                     items = data.items || [];
                     taxRate = data.taxRate || 8.5;
+                    
+                    // Ensure all items have quantity property
+                    items = items.map(item => ({
+                        ...item,
+                        quantity: item.quantity || 1
+                    }));
+                    
                     document.getElementById('taxRate').value = taxRate;
                     updateDisplay();
+                    checkDuplicates();
                 } catch (error) {
                     console.error('Error loading data:', error);
+                    showNotification('Loading Error', 'There was an error loading your saved data', 'error');
                 }
             }
         }
@@ -499,7 +847,7 @@
         function exportData() {
             try {
                 const data = {
-                    i: items.map(item => [item.name, item.price, item.link || '']),
+                    i: items.map(item => [item.name, item.price, item.link || '', item.quantity || 1]),
                     t: taxRate
                 };
                 
@@ -516,10 +864,10 @@
                 
                 setTimeout(() => URL.revokeObjectURL(url), 100);
                 
-                alert('Data exported successfully!');
+                showNotification('Export Complete', 'Your data has been exported successfully!', 'success');
             } catch (error) {
                 console.error('Export error:', error);
-                alert('Error exporting data. Please try again.');
+                showNotification('Export Failed', 'There was an error exporting your data', 'error');
             }
         }
 
@@ -537,7 +885,8 @@
                             id: Date.now() + index,
                             name: item[0] || '',
                             price: parseFloat(item[1]) || 0,
-                            link: item[2] || ''
+                            link: item[2] || '',
+                            quantity: parseInt(item[3]) || 1
                         }));
                     }
                     
@@ -548,9 +897,10 @@
                     
                     updateDisplay();
                     saveData();
-                    alert('Data imported successfully!');
+                    checkDuplicates();
+                    showNotification('Import Complete', 'Your data has been imported successfully!', 'success');
                 } catch (error) {
-                    alert('Error importing data. Please check the file format.');
+                    showNotification('Import Failed', 'Please check the file format and try again', 'error');
                 }
             };
             reader.readAsText(file);
@@ -563,15 +913,19 @@
                 items = [];
                 updateDisplay();
                 saveData();
+                checkDuplicates();
+                showNotification('List Cleared', 'All items have been removed from your list', 'info');
             }
         }
 
         document.addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && 
-                (e.target.id === 'itemName' || e.target.id === 'itemPrice' || e.target.id === 'itemLink')) {
+                (e.target.id === 'itemName' || e.target.id === 'itemPrice' || 
+                 e.target.id === 'itemQuantity' || e.target.id === 'itemLink')) {
                 addItem();
             }
         });
     </script>
 </body>
+</html>
 </html>
