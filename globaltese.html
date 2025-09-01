@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global System Demo</title>
+    <style>
+        /* Global CSS Variables for theming */
+        :root {
+            --primary-bg: #181a1b;
+            --secondary-bg: #232729;
+            --accent: #80cbc4;
+            --text: #f5f5f5;
+            --card-bg: rgba(35, 39, 42, 0.9);
+            --success: #4caf50;
+            --warning: #ff9800;
+            --error: #f44336;
+        }
+
+        :root[data-theme="light"] {
+            --primary-bg: #f5f5f5;
+            --secondary-bg: #ffffff;
+            --accent: #2196f3;
+            --text: #333333;
+            --card-bg: rgba(255, 255, 255, 0.9);
+        }
+
+        :root[data-theme="dark"] {
+            --primary-bg: #0a0a0a;
+            --secondary-bg: #1a1a1a;
+            --accent: #bb86fc;
+            --text: #ffffff;
+            --card-bg: rgba(26, 26, 26, 0.9);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: var(--primary-bg);
+            color: var(--text);
+            transition: all 0.3s ease;
+            min-height: 100vh;
+        }
+
+        /* Global Mobile-First Design */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        /* Global Settings Panel */
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 350px;
+            height: 100vh;
+            background: var(--secondary-bg);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+            border-left: 2px solid var(--accent);
+        }
+
+        .settings-panel.open {
+            right: 0;
+        }
+
+        .settings-header {
+            padding: 1.5rem;
+            background: var(--accent);
+            color: var(--primary-bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .settings-content {
+            padding: 1.5rem;
+        }
+
+        .setting-group {
+            margin-bottom: 2rem;
+        }
+
+        .setting-group h3 {
+            margin: 0 0 1rem 0;
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.5rem 0;
+        }
+
+        /* Global Components */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            background: var(--accent);
+            color: var(--primary-bg);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-bg);
+            color: var(--text);
+            border: 2px solid var(--accent);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #ccc;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: var(--accent);
+        }
+
+        .toggle-switch::before {
+            content: '';
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: white;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active::before {
+            left: 32px;
+        }
+
+        .select-input {
+            padding: 0.5rem;
+            border: 2px solid var(--accent);
+            border-radius: 5px;
+            background: var(--primary-bg);
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        .range-input {
+            width: 100%;
+            height: 5px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .range-input:hover {
+            opacity: 1;
+        }
+
+        .range-input::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        /* Global Notifications */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 350px;
+        }
+
+        .notification {
+            background: var(--card-bg);
+            border: 2px solid var(--accent);
+            border-radius: 10px;
+            padding: 1rem;
+            transform: translateX(400px);
+            animation: slideInNotification 0.3s ease-out forwards;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+        }
+
+        .notification.success { border-color: var(--success); }
+        .notification.warning { border-color: var(--warning); }
+        .notification.error { border-color: var(--error); }
+
+        @keyframes slideInNotification {
+            to { transform: translateX(0); }
+        }
+
+        /* Global Stats/Progress */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        /* Mobile Responsive Design */
+        @media (max-width: 768px) {
+            .settings-panel {
+                width: 100vw;
+                right: -100vw;
+            }
+            
+            .notification-container {
+                left: 10px;
+                right: 10px;
+                max-width: none;
+            }
+            
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Touch-friendly elements */
+        @media (hover: none) and (pointer: coarse) {
+            .btn, .toggle-switch, .select-input {
+                min-height: 44px; /* iOS recommended touch target */
+                min-width: 44px;
+            }
+            
+            .btn:hover {
+                transform: none; /* Disable hover animations on touch devices */
+            }
+        }
+
+        /* Demo styles */
+        .demo-section {
+            margin: 2rem 0;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 10px;
+        }
+
+        .settings-trigger {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 999;
+            background: var(--accent);
+            color: var(--primary-bg);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .settings-trigger:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="notifications" class="notification-container"></div>
+
+    <button class="settings-trigger" onclick="toggleSettings()">⚙️</button>
+
+    <div id="settingsPanel" class="settings-panel">
+        <div class="settings-header">
+            <h2>Global Settings</h2>
+            <button onclick="toggleSettings()" style="background:none;border:none;color:inherit;font-size:1.5rem;cursor:pointer;">×</button>
+        </div>
+        
+        <div class="settings-content">
+            <div class="setting-group">
+                <h3>Appearance</h3>
+                <div class="setting-item">
+                    <span>Theme</span>
+                    <select id="themeSelect" class="select-input" onchange="changeTheme()">
+                        <option value="default">Default</option>
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h3>Audio</h3>
+                <div class="setting-item">
+                    <span>Sound Effects</span>
+                    <div id="soundToggle" class="toggle-switch" onclick="toggleSetting('soundEnabled')"></div>
+                </div>
+                <div class="setting-item">
+                    <span>Music</span>
+                    <div id="musicToggle" class="toggle-switch" onclick="toggleSetting('musicEnabled')"></div>
+                </div>
+                <div class="setting-item">
+                    <span>Volume</span>
+                    <input type="range" id="volumeRange" class="range-input" min="0" max="100" value="50" oninput="updateVolume()">
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h3>Gameplay</h3>
+                <div class="setting-item">
+                    <span>Vibration</span>
+                    <div id="vibrationToggle" class="toggle-switch" onclick="toggleSetting('vibrationEnabled')"></div>
+                </div>
+                <div class="setting-item">
+                    <span>Auto-Save</span>
+                    <div id="autoSaveToggle" class="toggle-switch active" onclick="toggleSetting('autoSaveEnabled')"></div>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h3>Data Management</h3>
+                <button class="btn" onclick="exportAllData()">Export All Data</button>
+                <button class="btn btn-secondary" onclick="importAllData()" style="margin-top:0.5rem;">Import Data</button>
+                <button class="btn" onclick="clearAllData()" style="margin-top:0.5rem;background:#f44336;">Clear All Data</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Global User System Demo</h1>
+        
+        <div class="demo-section">
+            <h2>Global Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalGames">0</div>
+                    <div>Total Games Played</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalScore">0</div>
+                    <div>Total Score</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalTime">0</div>
+                    <div>Total Play Time (min)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="achievements">0</div>
+                    <div>Achievements Unlocked</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>Test Global Features</h2>
+            <button class="btn" onclick="testNotification('success')">Success Notification</button>
+            <button class="btn" onclick="testNotification('warning')" style="margin-left:0.5rem;">Warning</button>
+            <button class="btn" onclick="testNotification('error')" style="margin-left:0.5rem;">Error</button>
+            <br><br>
+            <button class="btn" onclick="updateGlobalStats()">Update Stats</button>
+            <button class="btn btn-secondary" onclick="testVibration()" style="margin-left:0.5rem;">Test Vibration</button>
+        </div>
+    </div>
+
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImportFile(event)">
+
+    <script>
+        // Global User Data Management System
+        class GlobalUserSystem {
+            constructor() {
+                this.storageKey = 'myGamesHub_userData';
+                this.settingsKey = 'myGamesHub_settings';
+                this.init();
+            }
+
+            // Initialize the system
+            init() {
+                this.loadUserData();
+                this.loadSettings();
+                this.applySettings();
+                this.startActivityTracking();
+                console.log('Global User System initialized');
+            }
+
+            // User Data Management
+            getUserData() {
+                return JSON.parse(localStorage.getItem(this.storageKey) || '{}');
+            }
+
+            setUserData(data) {
+                const currentData = this.getUserData();
+                const mergedData = { ...currentData, ...data };
+                localStorage.setItem(this.storageKey, JSON.stringify(mergedData));
+                this.updateGlobalStats();
+            }
+
+            // Game-specific data management
+            getGameData(gameName) {
+                const userData = this.getUserData();
+                return userData[gameName] || {};
+            }
+
+            setGameData(gameName, gameData) {
+                const userData = this.getUserData();
+                userData[gameName] = { ...userData[gameName], ...gameData };
+                this.setUserData(userData);
+            }
+
+            // Settings Management
+            getSettings() {
+                return JSON.parse(localStorage.getItem(this.settingsKey) || JSON.stringify({
+                    theme: 'default',
+                    soundEnabled: true,
+                    musicEnabled: true,
+                    vibrationEnabled: true,
+                    autoSaveEnabled: true,
+                    volume: 50
+                }));
+            }
+
+            setSetting(key, value) {
+                const settings = this.getSettings();
+                settings[key] = value;
+                localStorage.setItem(this.settingsKey, JSON.stringify(settings));
+                this.applySettings();
+            }
+
+            loadSettings() {
+                this.settings = this.getSettings();
+            }
+
+            loadUserData() {
+                this.userData = this.getUserData();
+            }
+
+            applySettings() {
+                // Apply theme
+                document.documentElement.setAttribute('data-theme', this.settings.theme);
+                
+                // Update UI elements
+                document.getElementById('themeSelect').value = this.settings.theme;
+                this.updateToggle('soundToggle', this.settings.soundEnabled);
+                this.updateToggle('musicToggle', this.settings.musicEnabled);
+                this.updateToggle('vibrationToggle', this.settings.vibrationEnabled);
+                this.updateToggle('autoSaveToggle', this.settings.autoSaveEnabled);
+                document.getElementById('volumeRange').value = this.settings.volume;
+            }
+
+            updateToggle(toggleId, isActive) {
+                const toggle = document.getElementById(toggleId);
+                if (toggle) {
+                    toggle.classList.toggle('active', isActive);
+                }
+            }
+
+            // Global Statistics
+            updateGlobalStats() {
+                const userData = this.getUserData();
+                let totalGames = 0;
+                let totalScore = 0;
+                let totalTime = 0;
+                let achievements = 0;
+
+                // Aggregate stats from all games
+                Object.keys(userData).forEach(gameName => {
+                    const gameData = userData[gameName];
+                    if (typeof gameData === 'object') {
+                        totalGames += gameData.gamesPlayed || 0;
+                        totalScore += gameData.totalScore || gameData.highScore || 0;
+                        totalTime += gameData.playTime || 0;
+                        achievements += gameData.achievements || 0;
+                    }
+                });
+
+                // Update display
+                document.getElementById('totalGames').textContent = totalGames;
+                document.getElementById('totalScore').textContent = totalScore.toLocaleString();
+                document.getElementById('totalTime').textContent = Math.round(totalTime);
+                document.getElementById('achievements').textContent = achievements;
+            }
+
+            // Activity Tracking
+            startActivityTracking() {
+                this.sessionStart = Date.now();
+                this.trackingInterval = setInterval(() => {
+                    const currentGame = this.getCurrentGame();
+                    if (currentGame) {
+                        this.addPlayTime(currentGame, 1); // Add 1 minute
+                    }
+                }, 60000); // Every minute
+            }
+
+            getCurrentGame() {
+                // Detect current game from URL or page title
+                const path = window.location.pathname;
+                if (path.includes('snake')) return 'snake';
+                if (path.includes('tetris')) return 'tetris';
+                if (path.includes('ListTracker')) return 'listtracker';
+                if (path.includes('asciipet')) return 'asciipet';
+                return null;
+            }
+
+            addPlayTime(gameName, minutes) {
+                const gameData = this.getGameData(gameName);
+                gameData.playTime = (gameData.playTime || 0) + minutes;
+                this.setGameData(gameName, gameData);
+            }
+
+            // Notifications System
+            showNotification(title, message, type = 'info', duration = 5000) {
+                const container = document.getElementById('notifications');
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                
+                notification.innerHTML = `
+                    <div style="font-weight: bold; margin-bottom: 0.5rem;">${title}</div>
+                    <div>${message}</div>
+                `;
+                
+                container.appendChild(notification);
+                
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.style.animation = 'slideInNotification 0.3s ease-in reverse';
+                        setTimeout(() => notification.remove(), 300);
+                    }
+                }, duration);
+                
+                return notification;
+            }
+
+            // Vibration Support
+            vibrate(pattern = [100]) {
+                if (this.settings.vibrationEnabled && 'vibrate' in navigator) {
+                    navigator.vibrate(pattern);
+                }
+            }
+
+            // Data Export/Import
+            exportAllData() {
+                const allData = {
+                    userData: this.getUserData(),
+                    settings: this.getSettings(),
+                    exportDate: new Date().toISOString(),
+                    version: '1.0'
+                };
+
+                const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `MyGamesHub_backup_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                URL.revokeObjectURL(url);
+                this.showNotification('Export Complete', 'Your data has been exported successfully!', 'success');
+            }
+
+            importAllData(data) {
+                try {
+                    if (data.userData) {
+                        localStorage.setItem(this.storageKey, JSON.stringify(data.userData));
+                    }
+                    if (data.settings) {
+                        localStorage.setItem(this.settingsKey, JSON.stringify(data.settings));
+                    }
+                    
+                    this.loadUserData();
+                    this.loadSettings();
+                    this.applySettings();
+                    this.updateGlobalStats();
+                    
+                    this.showNotification('Import Complete', 'Your data has been imported successfully!', 'success');
+                } catch (error) {
+                    this.showNotification('Import Failed', 'Please check the file format and try again.', 'error');
+                }
+            }
+
+            clearAllData() {
+                if (confirm('Are you sure you want to clear ALL data? This cannot be undone!')) {
+                    localStorage.removeItem(this.storageKey);
+                    localStorage.removeItem(this.settingsKey);
+                    
+                    this.loadUserData();
+                    this.loadSettings();
+                    this.applySettings();
+                    this.updateGlobalStats();
+                    
+                    this.showNotification('Data Cleared', 'All user data has been cleared.', 'warning');
+                }
+            }
+
+            // Mobile/Touch Detection
+            isMobile() {
+                return window.innerWidth <= 768 || 'ontouchstart' in window;
+            }
+
+            // PWA Support
+            enablePWA() {
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register('/sw.js')
+                        .then(registration => console.log('SW registered'))
+                        .catch(error => console.log('SW registration failed'));
+                }
+            }
+        }
+
+        // Initialize Global System
+        const globalSystem = new GlobalUserSystem();
+
+        // Global Functions for UI
+        function toggleSettings() {
+            const panel = document.getElementById('settingsPanel');
+            panel.classList.toggle('open');
+        }
+
+        function changeTheme() {
+            const theme = document.getElementById('themeSelect').value;
+            globalSystem.setSetting('theme', theme);
+        }
+
+        function toggleSetting(settingName) {
+            const currentValue = globalSystem.settings[settingName];
+            globalSystem.setSetting(settingName, !currentValue);
+            globalSystem.applySettings();
+        }
+
+        function updateVolume() {
+            const volume = document.getElementById('volumeRange').value;
+            globalSystem.setSetting('volume', volume);
+        }
+
+        function testNotification(type) {
+            const messages = {
+                success: ['Success!', 'Operation completed successfully.'],
+                warning: ['Warning!', 'Please check your settings.'],
+                error: ['Error!', 'Something went wrong.']
+            };
+            const [title, message] = messages[type];
+            globalSystem.showNotification(title, message, type);
+        }
+
+        function updateGlobalStats() {
+            // Simulate updating stats
+            const currentData = globalSystem.getUserData();
+            currentData.demo = {
+                gamesPlayed: (currentData.demo?.gamesPlayed || 0) + 1,
+                totalScore: (currentData.demo?.totalScore || 0) + Math.floor(Math.random() * 1000),
+                playTime: (currentData.demo?.playTime || 0) + Math.floor(Math.random() * 10),
+                achievements: (currentData.demo?.achievements || 0) + (Math.random() > 0.8 ? 1 : 0)
+            };
+            globalSystem.setUserData(currentData);
+        }
+
+        function testVibration() {
+            globalSystem.vibrate([100, 50, 100]);
+            globalSystem.showNotification('Vibration', 'Did you feel that?', 'info');
+        }
+
+        function exportAllData() {
+            globalSystem.exportAllData();
+        }
+
+        function importAllData() {
+            document.getElementById('importFile').click();
+        }
+
+        function handleImportFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    globalSystem.importAllData(data);
+                } catch (error) {
+                    globalSystem.showNotification('Import Failed', 'Invalid file format.', 'error');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function clearAllData() {
+            globalSystem.clearAllData();
+        }
+
+        // Initialize stats display
+        globalSystem.updateGlobalStats();
+
+        // Close settings panel when clicking outside (mobile friendly)
+        document.addEventListener('click', function(e) {
+            const panel = document.getElementById('settingsPanel');
+            const trigger = document.querySelector('.settings-trigger');
+            
+            if (!panel.contains(e.target) && !trigger.contains(e.target) && panel.classList.contains('open')) {
+                panel.classList.remove('open');
+            }
+        });
+
+        // Expose globalSystem to window for use in other pages
+        window.globalSystem = globalSystem;
+    </script>
+</body>
+</html>
