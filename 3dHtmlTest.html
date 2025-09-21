@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>3D Shape Editor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: black;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: white;
+            overflow: hidden;
+        }
+        
+        #gameCanvas {
+            display: block;
+            background: black;
+        }
+        
+        .ui-panel {
+            position: fixed;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid white;
+            border-radius: 10px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .controls {
+            top: 20px;
+            left: 20px;
+        }
+        
+        .shape-menu {
+            top: 20px;
+            right: 20px;
+            width: 200px;
+        }
+        
+        .object-list {
+            bottom: 20px;
+            left: 20px;
+            width: 250px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .controls h3, .shape-menu h3, .object-list h3 {
+            margin: 0 0 10px 0;
+            color: white;
+        }
+        
+        .controls p {
+            margin: 3px 0;
+            font-size: 12px;
+        }
+        
+        .shape-btn {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+            padding: 8px;
+            background: rgba(50, 50, 50, 0.8);
+            border: 1px solid white;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        .shape-btn:hover {
+            background: rgba(100, 100, 100, 0.8);
+        }
+        
+        .object-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px;
+            margin: 2px 0;
+            background: rgba(30, 30, 30, 0.8);
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        .object-item.selected {
+            background: rgba(100, 150, 255, 0.5);
+            border: 1px solid #6495ff;
+        }
+        
+        .object-controls {
+            display: flex;
+            gap: 3px;
+        }
+        
+        .small-btn {
+            padding: 2px 6px;
+            font-size: 10px;
+            background: rgba(60, 60, 60, 0.8);
+            border: 1px solid #999;
+            color: white;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .small-btn:hover {
+            background: rgba(120, 120, 120, 0.8);
+        }
+        
+        .delete-btn {
+            background: rgba(150, 50, 50, 0.8);
+        }
+        
+        .delete-btn:hover {
+            background: rgba(200, 50, 50, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    
+    <div class="ui-panel controls">
+        <h3>Camera Controls</h3>
+        <p><strong>WASD</strong> - Move around</p>
+        <p><strong>Q/E</strong> - Up/Down</p>
+        <p><strong>Arrows</strong> - Rotate view</p>
+        <p><strong>Click</strong> - Select object</p>
+        <p><strong>Selected Object:</strong></p>
+        <p><strong>I/K</strong> - Rotate X</p>
+        <p><strong>J/L</strong> - Rotate Y</p>
+        <p><strong>U/O</strong> - Rotate Z</p>
+        <p><strong>+/-</strong> - Scale</p>
+        <p><strong>TFGH</strong> - Move X/Z</p>
+        <p><strong>R/Y</strong> - Move Y</p>
+    </div>
+    
+    <div class="ui-panel shape-menu">
+        <h3>Spawn Shapes</h3>
+        <button class="shape-btn" onclick="spawnShape('cube')">Cube</button>
+        <button class="shape-btn" onclick="spawnShape('sphere')">Sphere</button>
+        <button class="shape-btn" onclick="spawnShape('cylinder')">Cylinder</button>
+        <button class="shape-btn" onclick="spawnShape('cone')">Cone</button>
+        <button class="shape-btn" onclick="spawnShape('pyramid')">Pyramid</button>
+        <button class="shape-btn" onclick="spawnShape('octahedron')">Octahedron</button>
+        <button class="shape-btn" onclick="spawnShape('icosahedron')">Icosahedron</button>
+        <button class="shape-btn" onclick="spawnShape('dodecahedron')">Dodecahedron</button>
+        <button class="shape-btn" onclick="spawnShape('torus')">Torus</button>
+        <button class="shape-btn" onclick="spawnShape('tetrahedron')">Tetrahedron</button>
+        <button class="shape-btn" onclick="spawnShape('prism')">Triangular Prism</button>
+        <button class="shape-btn" onclick="spawnShape('hexagon')">Hexagon</button>
+        <button class="shape-btn" onclick="spawnShape('star')">Star</button>
+        <button class="shape-btn" onclick="spawnShape('helix')">Helix</button>
+        <button class="shape-btn" onclick="spawnShape('grid')">Grid</button>
+        <button class="shape-btn" onclick="spawnShape('line')">Line</button>
+        <button class="shape-btn" onclick="spawnShape('triangle')">Triangle</button>
+        <button class="shape-btn" onclick="spawnShape('diamond')">Diamond</button>
+    </div>
+    
+    <div class="ui-panel object-list">
+        <h3>Objects (<span id="objectCount">0</span>)</h3>
+        <div id="objectList"></div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Setup canvas
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Game state
+        const camera = {
+            x: 0,
+            y: 0,
+            z: -25,
+            rotX: 0,
+            rotY: 0,
+            speed: 0.5
+        };
+        
+        const keys = {};
+        let shapes = [];
+        let selectedShape = null;
+        let shapeIdCounter = 0;
+        
+        // Shape definitions
+        const shapeTemplates = {
+            cube: {
+                vertices: [
+                    {x: -1, y: -1, z: 1}, {x: 1, y: -1, z: 1}, {x: 1, y: 1, z: 1}, {x: -1, y: 1, z: 1},
+                    {x: -1, y: -1, z: -1}, {x: 1, y: -1, z: -1}, {x: 1, y: 1, z: -1}, {x: -1, y: 1, z: -1}
+                ],
+                edges: [[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]]
+            },
+            
+            sphere: (() => {
+                const vertices = [];
+                const edges = [];
+                const rings = 8;
+                const segments = 12;
+                
+                // Generate sphere vertices
+                for (let i = 0; i <= rings; i++) {
+                    const phi = Math.PI * i / rings;
+                    for (let j = 0; j < segments; j++) {
+                        const theta = 2 * Math.PI * j / segments;
+                        vertices.push({
+                            x: Math.sin(phi) * Math.cos(theta),
+                            y: Math.cos(phi),
+                            z: Math.sin(phi) * Math.sin(theta)
+                        });
+                    }
+                }
+                
+                // Generate sphere edges
+                for (let i = 0; i < rings; i++) {
+                    for (let j = 0; j < segments; j++) {
+                        const current = i * segments + j;
+                        const next = i * segments + ((j + 1) % segments);
+                        const below = (i + 1) * segments + j;
+                        
+                        if (i < rings) edges.push([current, next]);
+                        if (i < rings) edges.push([current, below]);
+                    }
+                }
+                
+                return { vertices, edges };
+            })(),
+            
+            cylinder: (() => {
+                const vertices = [];
+                const edges = [];
+                const segments = 12;
+                const height = 2;
+                
+                // Top circle
+                for (let i = 0; i < segments; i++) {
+                    const angle = 2 * Math.PI * i / segments;
+                    vertices.push({
+                        x: Math.cos(angle),
+                        y: height / 2,
+                        z: Math.sin(angle)
+                    });
+                }
+                
+                // Bottom circle
+                for (let i = 0; i < segments; i++) {
+                    const angle = 2 * Math.PI * i / segments;
+                    vertices.push({
+                        x: Math.cos(angle),
+                        y: -height / 2,
+                        z: Math.sin(angle)
+                    });
+                }
+                
+                // Top circle edges
+                for (let i = 0; i < segments; i++) {
+                    edges.push([i, (i + 1) % segments]);
+                }
+                
+                // Bottom circle edges
+                for (let i = 0; i < segments; i++) {
+                    edges.push([i + segments, ((i + 1) % segments) + segments]);
+                }
+                
+                // Vertical edges
+                for (let i = 0; i < segments; i++) {
+                    edges.push([i, i + segments]);
+                }
+                
+                return { vertices, edges };
+            })(),
+            
+            cone: (() => {
+                const vertices = [];
+                const edges = [];
+                const segments = 12;
+                
+                // Apex
+                vertices.push({x: 0, y: 1, z: 0});
+                
+                // Base circle
+                for (let i = 0; i < segments; i++) {
+                    const angle = 2 * Math.PI * i / segments;
+                    vertices.push({
+                        x: Math.cos(angle),
+                        y: -1,
+                        z: Math.sin(angle)
+                    });
+                }
+                
+                // Base circle edges
+                for (let i = 1; i <= segments; i++) {
+                    edges.push([i, (i % segments) + 1]);
+                }
+                
+                // Edges from apex to base
+                for (let i = 1; i <= segments; i++) {
+                    edges.push([0, i]);
+                }
+                
+                return { vertices, edges };
+            })(),
+            
+            torus: (() => {
+                const vertices = [];
+                const edges = [];
+                const majorSegments = 12;
+                const minorSegments = 8;
+                const majorRadius = 1;
+                const minorRadius = 0.3;
+                
+                for (let i = 0; i < majorSegments; i++) {
+                    const u = 2 * Math.PI * i / majorSegments;
+                    for (let j = 0; j < minorSegments; j++) {
+                        const v = 2 * Math.PI * j / minorSegments;
+                        vertices.push({
+                            x: (majorRadius + minorRadius * Math.cos(v)) * Math.cos(u),
+                            y: minorRadius * Math.sin(v),
+                            z: (majorRadius + minorRadius * Math.cos(v)) * Math.sin(u)
+                        });
+                    }
+                }
+                
+                for (let i = 0; i < majorSegments; i++) {
+                    for (let j = 0; j < minorSegments; j++) {
+                        const current = i * minorSegments + j;
+                        const nextJ = i * minorSegments + ((j + 1) % minorSegments);
+                        const nextI = ((i + 1) % majorSegments) * minorSegments + j;
+                        
+                        edges.push([current, nextJ]);
+                        edges.push([current, nextI]);
+                    }
+                }
+                
+                return { vertices, edges };
+            })(),
+            
+            icosahedron: (() => {
+                const phi = (1 + Math.sqrt(5)) / 2; // Golden ratio
+                const vertices = [
+                    {x: -1, y: phi, z: 0}, {x: 1, y: phi, z: 0}, {x: -1, y: -phi, z: 0}, {x: 1, y: -phi, z: 0},
+                    {x: 0, y: -1, z: phi}, {x: 0, y: 1, z: phi}, {x: 0, y: -1, z: -phi}, {x: 0, y: 1, z: -phi},
+                    {x: phi, y: 0, z: -1}, {x: phi, y: 0, z: 1}, {x: -phi, y: 0, z: -1}, {x: -phi, y: 0, z: 1}
+                ];
+                
+                const edges = [
+                    [0,11],[0,5],[0,1],[0,7],[0,10],[1,5],[5,11],[11,10],[10,7],[7,1],
+                    [3,9],[3,4],[3,2],[3,6],[3,8],[4,9],[9,8],[8,6],[6,2],[2,4],
+                    [1,9],[5,4],[11,2],[10,6],[7,8],[0,1],[0,5],[0,7],[0,10],[0,11],
+                    [1,5],[1,7],[1,9],[2,3],[2,4],[2,6],[2,11],[3,4],[3,6],[3,8],
+                    [3,9],[4,5],[4,9],[5,11],[6,7],[6,8],[6,10],[7,8],[7,10],[8,9],
+                    [9,10],[10,11],[11,4]
+                ].filter((edge, index, self) => 
+                    index === self.findIndex(e => (e[0] === edge[0] && e[1] === edge[1]) || (e[0] === edge[1] && e[1] === edge[0]))
+                );
+                
+                return { vertices, edges };
+            })(),
+            
+            dodecahedron: (() => {
+                const phi = (1 + Math.sqrt(5)) / 2;
+                const vertices = [
+                    {x: 1, y: 1, z: 1}, {x: 1, y: 1, z: -1}, {x: 1, y: -1, z: 1}, {x: 1, y: -1, z: -1},
+                    {x: -1, y: 1, z: 1}, {x: -1, y: 1, z: -1}, {x: -1, y: -1, z: 1}, {x: -1, y: -1, z: -1},
+                    {x: 0, y: 1/phi, z: phi}, {x: 0, y: -1/phi, z: phi}, {x: 0, y: 1/phi, z: -phi}, {x: 0, y: -1/phi, z: -phi},
+                    {x: 1/phi, y: phi, z: 0}, {x: -1/phi, y: phi, z: 0}, {x: 1/phi, y: -phi, z: 0}, {x: -1/phi, y: -phi, z: 0},
+                    {x: phi, y: 0, z: 1/phi}, {x: -phi, y: 0, z: 1/phi}, {x: phi, y: 0, z: -1/phi}, {x: -phi, y: 0, z: -1/phi}
+                ];
+                
+                const edges = [
+                    [0,8],[0,12],[0,16],[1,10],[1,12],[1,18],[2,8],[2,14],[2,16],
+                    [3,10],[3,14],[3,18],[4,8],[4,13],[4,17],[5,10],[5,13],[5,19],
+                    [6,8],[6,15],[6,17],[7,10],[7,15],[7,19],[8,9],[9,16],[9,17],
+                    [10,11],[11,18],[11,19],[12,13],[13,17],[14,15],[15,19],[16,18]
+                ];
+                
+                return { vertices, edges };
+            })(),
+            
+            tetrahedron: {
+                vertices: [
+                    {x: 1, y: 1, z: 1}, {x: 1, y: -1, z: -1}, {x: -1, y: 1, z: -1}, {x: -1, y: -1, z: 1}
+                ],
+                edges: [[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]]
+            },
+            
+            prism: {
+                vertices: [
+                    {x: 0, y: 1, z: 1}, {x: -1, y: -1, z: 1}, {x: 1, y: -1, z: 1},
+                    {x: 0, y: 1, z: -1}, {x: -1, y: -1, z: -1}, {x: 1, y: -1, z: -1}
+                ],
+                edges: [[0,1],[1,2],[2,0],[3,4],[4,5],[5,3],[0,3],[1,4],[2,5]]
+            },
+            
+            hexagon: (() => {
+                const vertices = [];
+                const edges = [];
+                for (let i = 0; i < 6; i++) {
+                    const angle = 2 * Math.PI * i / 6;
+                    vertices.push({
+                        x: Math.cos(angle),
+                        y: 0,
+                        z: Math.sin(angle)
+                    });
+                }
+                for (let i = 0; i < 6; i++) {
+                    edges.push([i, (i + 1) % 6]);
+                }
+                return { vertices, edges };
+            })(),
+            
+            star: (() => {
+                const vertices = [];
+                const edges = [];
+                const points = 5;
+                const outerRadius = 1;
+                const innerRadius = 0.4;
+                
+                for (let i = 0; i < points * 2; i++) {
+                    const angle = Math.PI * i / points;
+                    const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                    vertices.push({
+                        x: Math.cos(angle) * radius,
+                        y: 0,
+                        z: Math.sin(angle) * radius
+                    });
+                }
+                
+                for (let i = 0; i < points * 2; i++) {
+                    edges.push([i, (i + 1) % (points * 2)]);
+                }
+                
+                return { vertices, edges };
+            })(),
+            
+            helix: (() => {
+                const vertices = [];
+                const edges = [];
+                const turns = 3;
+                const points = 30;
+                const radius = 0.5;
+                const height = 2;
+                
+                for (let i = 0; i < points; i++) {
+                    const t = i / (points - 1);
+                    const angle = 2 * Math.PI * turns * t;
+                    vertices.push({
+                        x: Math.cos(angle) * radius,
+                        y: (t - 0.5) * height,
+                        z: Math.sin(angle) * radius
+                    });
+                }
+                
+                for (let i = 0; i < points - 1; i++) {
+                    edges.push([i, i + 1]);
+                }
+                
+                return { vertices, edges };
+            })(),
+            
+            grid: (() => {
+                const vertices = [];
+                const edges = [];
+                const size = 3;
+                const spacing = 0.5;
+                
+                // Create grid vertices
+                for (let x = -size; x <= size; x++) {
+                    for (let z = -size; z <= size; z++) {
+                        vertices.push({
+                            x: x * spacing,
+                            y: 0,
+                            z: z * spacing
+                        });
+                    }
+                }
+                
+                // Create grid edges
+                const gridSize = size * 2 + 1;
+                for (let x = 0; x < gridSize; x++) {
+                    for (let z = 0; z < gridSize; z++) {
+                        const current = x * gridSize + z;
+                        if (z < gridSize - 1) edges.push([current, current + 1]);
+                        if (x < gridSize - 1) edges.push([current, current + gridSize]);
+                    }
+                }
+                
+                return { vertices, edges };
+            })(),
+
+            pyramid: {
+                vertices: [
+                    {x: -1, y: 1, z: 1}, {x: 1, y: 1, z: 1}, {x: 1, y: 1, z: -1}, {x: -1, y: 1, z: -1},
+                    {x: 0, y: -1, z: 0}
+                ],
+                edges: [[0,1],[1,2],[2,3],[3,0],[0,4],[1,4],[2,4],[3,4]]
+            },
+            octahedron: {
+                vertices: [
+                    {x: 0, y: 1, z: 0}, {x: 0, y: -1, z: 0},
+                    {x: 1, y: 0, z: 0}, {x: -1, y: 0, z: 0},
+                    {x: 0, y: 0, z: 1}, {x: 0, y: 0, z: -1}
+                ],
+                edges: [[0,2],[0,3],[0,4],[0,5],[1,2],[1,3],[1,4],[1,5],[2,4],[2,5],[3,4],[3,5]]
+            },
+            line: {
+                vertices: [{x: -1, y: 0, z: 0}, {x: 1, y: 0, z: 0}],
+                edges: [[0,1]]
+            },
+            triangle: {
+                vertices: [{x: 0, y: 1, z: 0}, {x: -1, y: -1, z: 0}, {x: 1, y: -1, z: 0}],
+                edges: [[0,1],[1,2],[2,0]]
+            },
+            diamond: {
+                vertices: [
+                    {x: 0, y: 1, z: 0}, {x: 0, y: -1, z: 0},
+                    {x: 1, y: 0, z: 0}, {x: -1, y: 0, z: 0}
+                ],
+                edges: [[0,2],[0,3],[1,2],[1,3]]
+            }
+        };
+        
+        // Input handling
+        window.addEventListener('keydown', (e) => {
+            keys[e.code] = true;
+        });
+        
+        window.addEventListener('keyup', (e) => {
+            keys[e.code] = false;
+        });
+        
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            // Check if click is near any shape vertices
+            let closestShape = null;
+            let minDistance = 50; // Click tolerance
+            
+            shapes.forEach(shape => {
+                shape.projectedVertices.forEach(vertex => {
+                    if (vertex.z > -10) {
+                        const distance = Math.sqrt(
+                            Math.pow(vertex.x - mouseX, 2) + Math.pow(vertex.y - mouseY, 2)
+                        );
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            closestShape = shape;
+                        }
+                    }
+                });
+            });
+            
+            selectedShape = closestShape;
+            updateObjectList();
+        });
+        
+        // 3D Math functions
+        function rotateX(point, angle) {
+            const cos = Math.cos(angle);
+            const sin = Math.sin(angle);
+            return {
+                x: point.x,
+                y: point.y * cos - point.z * sin,
+                z: point.y * sin + point.z * cos
+            };
+        }
+        
+        function rotateY(point, angle) {
+            const cos = Math.cos(angle);
+            const sin = Math.sin(angle);
+            return {
+                x: point.x * cos + point.z * sin,
+                y: point.y,
+                z: -point.x * sin + point.z * cos
+            };
+        }
+        
+        function rotateZ(point, angle) {
+            const cos = Math.cos(angle);
+            const sin = Math.sin(angle);
+            return {
+                x: point.x * cos - point.y * sin,
+                y: point.x * sin + point.y * cos,
+                z: point.z
+            };
+        }
+        
+        function project(point) {
+            const fov = 800;
+            const distance = fov / (fov + point.z);
+            return {
+                x: point.x * distance + canvas.width / 2,
+                y: point.y * distance + canvas.height / 2,
+                z: point.z,
+                scale: distance
+            };
+        }
+        
+        function spawnShape(shapeType) {
+            const template = shapeTemplates[shapeType];
+            const shape = {
+                id: shapeIdCounter++,
+                type: shapeType,
+                vertices: template.vertices.map(v => ({...v})),
+                edges: template.edges.map(e => [...e]),
+                x: Math.random() * 10 - 5,
+                y: Math.random() * 10 - 5,
+                z: Math.random() * 10 - 5,
+                rotX: 0,
+                rotY: 0,
+                rotZ: 0,
+                scale: 3,
+                projectedVertices: []
+            };
+            shapes.push(shape);
+            selectedShape = shape;
+            updateObjectList();
+        }
+        
+        function deleteShape(shapeId) {
+            const index = shapes.findIndex(s => s.id === shapeId);
+            if (index !== -1) {
+                if (selectedShape && selectedShape.id === shapeId) {
+                    selectedShape = null;
+                }
+                shapes.splice(index, 1);
+                updateObjectList();
+            }
+        }
+        
+        function selectShape(shapeId) {
+            selectedShape = shapes.find(s => s.id === shapeId) || null;
+            updateObjectList();
+        }
+        
+        function updateObjectList() {
+            const listElement = document.getElementById('objectList');
+            const countElement = document.getElementById('objectCount');
+            
+            countElement.textContent = shapes.length;
+            listElement.innerHTML = '';
+            
+            shapes.forEach(shape => {
+                const item = document.createElement('div');
+                item.className = 'object-item' + (selectedShape && selectedShape.id === shape.id ? ' selected' : '');
+                item.innerHTML = `
+                    <span onclick="selectShape(${shape.id})" style="cursor: pointer; flex: 1;">
+                        ${shape.type.charAt(0).toUpperCase() + shape.type.slice(1)} #${shape.id}
+                    </span>
+                    <div class="object-controls">
+                        <button class="small-btn delete-btn" onclick="deleteShape(${shape.id})">×</button>
+                    </div>
+                `;
+                listElement.appendChild(item);
+            });
+        }
+        
+        function updateCamera() {
+            // Camera movement
+            let forward = { x: 0, y: 0, z: 0 };
+            let right = { x: 0, y: 0, z: 0 };
+            
+            forward.x = Math.sin(camera.rotY);
+            forward.z = Math.cos(camera.rotY);
+            right.x = Math.cos(camera.rotY);
+            right.z = -Math.sin(camera.rotY);
+            
+            if (keys['KeyW']) {
+                camera.x += forward.x * camera.speed;
+                camera.z += forward.z * camera.speed;
+            }
+            if (keys['KeyS']) {
+                camera.x -= forward.x * camera.speed;
+                camera.z -= forward.z * camera.speed;
+            }
+            if (keys['KeyA']) {
+                camera.x -= right.x * camera.speed;
+                camera.z -= right.z * camera.speed;
+            }
+            if (keys['KeyD']) {
+                camera.x += right.x * camera.speed;
+                camera.z += right.z * camera.speed;
+            }
+            if (keys['KeyQ']) camera.y -= camera.speed;
+            if (keys['KeyE']) camera.y += camera.speed;
+            
+            // Camera rotation
+            if (keys['ArrowLeft']) camera.rotY -= 0.05;
+            if (keys['ArrowRight']) camera.rotY += 0.05;
+            if (keys['ArrowUp']) camera.rotX -= 0.05;
+            if (keys['ArrowDown']) camera.rotX += 0.05;
+            
+            // Selected object controls
+            if (selectedShape) {
+                // Rotation
+                if (keys['KeyI']) selectedShape.rotX += 0.05;
+                if (keys['KeyK']) selectedShape.rotX -= 0.05;
+                if (keys['KeyJ']) selectedShape.rotY -= 0.05;
+                if (keys['KeyL']) selectedShape.rotY += 0.05;
+                if (keys['KeyU']) selectedShape.rotZ -= 0.05;
+                if (keys['KeyO']) selectedShape.rotZ += 0.05;
+                
+                // Scale
+                if (keys['Equal'] || keys['NumpadAdd']) selectedShape.scale *= 1.02;
+                if (keys['Minus'] || keys['NumpadSubtract']) selectedShape.scale *= 0.98;
+                
+                // Position
+                if (keys['KeyT']) selectedShape.x -= 0.2;
+                if (keys['KeyG']) selectedShape.x += 0.2;
+                if (keys['KeyF']) selectedShape.z += 0.2;
+                if (keys['KeyH']) selectedShape.z -= 0.2;
+                if (keys['KeyR']) selectedShape.y += 0.2;
+                if (keys['KeyY']) selectedShape.y -= 0.2;
+            }
+        }
+        
+        function render() {
+            // Clear canvas
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Process each shape
+            shapes.forEach(shape => {
+                // Transform vertices
+                shape.projectedVertices = shape.vertices.map(vertex => {
+                    // Scale
+                    let scaled = {
+                        x: vertex.x * shape.scale,
+                        y: vertex.y * shape.scale,
+                        z: vertex.z * shape.scale
+                    };
+                    
+                    // Apply shape rotation
+                    let rotated = rotateX(scaled, shape.rotX);
+                    rotated = rotateY(rotated, shape.rotY);
+                    rotated = rotateZ(rotated, shape.rotZ);
+                    
+                    // Apply shape position
+                    let positioned = {
+                        x: rotated.x + shape.x,
+                        y: rotated.y + shape.y,
+                        z: rotated.z + shape.z
+                    };
+                    
+                    // Apply camera transformation
+                    let transformed = {
+                        x: positioned.x - camera.x,
+                        y: positioned.y - camera.y,
+                        z: positioned.z - camera.z
+                    };
+                    
+                    transformed = rotateY(transformed, -camera.rotY);
+                    transformed = rotateX(transformed, -camera.rotX);
+                    
+                    return project(transformed);
+                });
+                
+                // Draw edges
+                const isSelected = selectedShape && selectedShape.id === shape.id;
+                ctx.strokeStyle = isSelected ? '#6495ff' : 'white';
+                ctx.lineWidth = isSelected ? 4 : 2;
+                
+                shape.edges.forEach(edge => {
+                    const p1 = shape.projectedVertices[edge[0]];
+                    const p2 = shape.projectedVertices[edge[1]];
+                    
+                    if (p1.z > -50 && p2.z > -50) {
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.stroke();
+                    }
+                });
+                
+                // Draw vertices
+                ctx.fillStyle = isSelected ? '#6495ff' : 'white';
+                
+                shape.projectedVertices.forEach(vertex => {
+                    if (vertex.z > -50) {
+                        const size = Math.max(2, 4 * vertex.scale);
+                        
+                        ctx.beginPath();
+                        ctx.arc(vertex.x, vertex.y, size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+            });
+        }
+        
+        function gameLoop() {
+            updateCamera();
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Start with a cube
+        spawnShape('cube');
+        
+        // Start the game loop
+        gameLoop();
+    </script>
+</body>
+</html>
